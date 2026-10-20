@@ -1,0 +1,534 @@
+<!DOCTYPE html> <!-- Declaración de tipo: activa el modo estándar de HTML5 -->
+<!--
+  =============================================================================
+  Portafolio · Cristian Fernando Hércules Serrano — Diseñador gráfico
+  -----------------------------------------------------------------------------
+  index.html  → estructura y contenido (este archivo)
+  styles.css  → identidad visual marino + dorado, layout editorial responsive
+  script.js   → pantalla de carga, menú, efectos de scroll, casos de estudio,
+                acordeón, línea de tiempo y formulario
+
+  Estructura de la página:
+    Pantalla de carga → Barra superior (móvil) / Riel lateral (escritorio)
+    I Inicio · II Filosofía · III Trabajos · IV Servicios · V Trayectoria
+    VI Contacto · Pie de página · Panel de caso de estudio · Notificación
+
+  Convenciones:
+    · Clases BEM (bloque__elemento--modificador).
+    · Atributos data-* como "ganchos" para JavaScript (data-reveal, data-case…),
+      separados de las clases de estilo: se puede rediseñar sin romper la lógica.
+    · Todo lo marcado con "REEMPLAZAR" es contenido de ejemplo.
+  =============================================================================
+-->
+<html lang="es"> <!-- Raíz del documento; lang="es" informa el idioma a lectores de pantalla y buscadores -->
+<head> <!-- Metadatos y recursos (no se pintan en pantalla) -->
+  <meta charset="UTF-8" /> <!-- Codificación UTF-8: tildes, ñ y símbolos correctos -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Ancho igual al del dispositivo: base del diseño responsive -->
+  <meta name="description" content="Portafolio de Cristian Fernando Hércules Serrano, diseñador gráfico especializado en identidad visual, dirección de arte y diseño editorial." /> <!-- Descripción para buscadores (SEO) -->
+  <meta name="author" content="Cristian Fernando Hércules Serrano" /> <!-- Autor del sitio -->
+  <meta name="theme-color" content="#0B1424" /> <!-- Color de la barra del navegador móvil: azul marino de la marca -->
+  <meta property="og:title" content="Cristian Hércules · Diseñador gráfico" /> <!-- Open Graph: título al compartir en redes -->
+  <meta property="og:description" content="Identidad visual, dirección de arte y diseño editorial con rigor y oficio." /> <!-- Open Graph: descripción al compartir -->
+  <meta property="og:type" content="website" /> <!-- Open Graph: tipo de contenido -->
+  <title>Cristian Hércules · Diseñador gráfico</title> <!-- Título de la pestaña y del resultado en buscadores -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230B1424'/%3E%3Crect x='5' y='5' width='54' height='54' fill='none' stroke='%23C9A35F' stroke-width='2'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' dominant-baseline='middle' font-family='Georgia,serif' font-style='italic' font-size='26' fill='%23C9A35F'%3ECH%3C/text%3E%3C/svg%3E" /> <!-- Favicon SVG embebido: monograma dorado sobre marino, sin archivo extra -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" /> <!-- Conexión anticipada con Google Fonts: acelera la carga -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> <!-- Conexión anticipada con el servidor de archivos de fuente (requiere CORS) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" /> <!-- Cormorant Garamond (serif clásica para títulos) y Jost (sans geométrica para texto); display=swap evita texto invisible -->
+  <link rel="stylesheet" href="styles.css" /> <!-- Hoja de estilos propia -->
+  <script>document.documentElement.classList.add('js');</script> <!-- Marca <html> con "js" antes del primer pintado: la pantalla de carga solo existe si hay JavaScript -->
+  <script src="script.js" defer></script> <!-- Lógica del sitio; defer la ejecuta tras analizar el HTML sin bloquear el renderizado -->
+</head> <!-- Fin de la cabecera -->
+
+<body> <!-- Cuerpo: todo el contenido visible -->
+
+  <a class="skip-link" href="#contenido">Saltar al contenido</a> <!-- Accesibilidad: permite a usuarios de teclado saltar la navegación -->
+
+  <!-- ============================ PANTALLA DE CARGA ============================ -->
+  <div class="loader" id="loader" aria-hidden="true"> <!-- Telón de entrada; decorativo, por eso oculto a lectores de pantalla -->
+    <span class="loader__mark">CH</span> <!-- Monograma que aparece al centro -->
+    <span class="loader__name">Cristian Hércules</span> <!-- Nombre en mayúsculas espaciadas -->
+    <span class="loader__bar"><span class="loader__bar-fill"></span></span> <!-- Línea dorada que se llena como barra de progreso -->
+  </div> <!-- Fin de la pantalla de carga -->
+
+  <!-- ===================== BARRA SUPERIOR (móvil y tablet) ===================== -->
+  <header class="topbar" id="topbar"> <!-- Barra fija superior; se oculta en escritorio (allí aparece el riel lateral) -->
+    <a class="topbar__brand" href="#inicio" aria-label="Cristian Hércules, ir al inicio"> <!-- Marca que lleva al inicio -->
+      <span class="monogram" aria-hidden="true">CH</span> <!-- Monograma enmarcado en dorado -->
+      <span class="topbar__name" aria-hidden="true">Cristian Hércules</span> <!-- Nombre corto; oculto a lectores porque el aria-label ya lo dice -->
+    </a> <!-- Fin de la marca -->
+    <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="menuOverlay"> <!-- Botón del menú; aria-expanded indica si está abierto -->
+      <span class="menu-toggle__text">Menú</span> <!-- Texto visible (JS lo cambia a "Cerrar") y nombre accesible del botón -->
+      <span class="menu-toggle__icon" aria-hidden="true"><span></span><span></span></span> <!-- Dos líneas doradas que forman una "X" al abrir -->
+    </button> <!-- Fin del botón -->
+    <span class="topbar__progress" aria-hidden="true"></span> <!-- Línea dorada de progreso de lectura (se llena con el scroll) -->
+  </header> <!-- Fin de la barra superior -->
+
+  <!-- ===================== MENÚ A PANTALLA COMPLETA (móvil) ===================== -->
+  <nav class="menu" id="menuOverlay" aria-label="Menú principal"> <!-- Panel de navegación que se despliega como un telón -->
+    <ol class="menu__list"> <!-- Lista ordenada: las secciones siguen una numeración romana -->
+      <li style="--i: 0;"><a class="menu__link" href="#inicio" data-nav-link><span class="menu__numeral">I</span>Inicio</a></li> <!-- --i escalona la animación de entrada; data-nav-link permite marcar la sección activa -->
+      <li style="--i: 1;"><a class="menu__link" href="#filosofia" data-nav-link><span class="menu__numeral">II</span>Filosofía</a></li> <!-- Enlace a Filosofía -->
+      <li style="--i: 2;"><a class="menu__link" href="#trabajos" data-nav-link><span class="menu__numeral">III</span>Trabajos</a></li> <!-- Enlace a Trabajos -->
+      <li style="--i: 3;"><a class="menu__link" href="#servicios" data-nav-link><span class="menu__numeral">IV</span>Servicios</a></li> <!-- Enlace a Servicios -->
+      <li style="--i: 4;"><a class="menu__link" href="#trayectoria" data-nav-link><span class="menu__numeral">V</span>Trayectoria</a></li> <!-- Enlace a Trayectoria -->
+      <li style="--i: 5;"><a class="menu__link" href="#contacto" data-nav-link><span class="menu__numeral">VI</span>Contacto</a></li> <!-- Enlace a Contacto -->
+    </ol> <!-- Fin de la lista -->
+    <div class="menu__footer"> <!-- Datos al pie del menú -->
+      <a href="mailto:cristian@example.com">cristian@example.com</a> <!-- Correo (REEMPLAZAR) -->
+      <p>Identidad visual · Dirección de arte · Diseño editorial</p> <!-- Especialidades -->
+    </div> <!-- Fin del pie del menú -->
+  </nav> <!-- Fin del menú -->
+
+  <!-- ========================= RIEL LATERAL (escritorio) ========================= -->
+  <aside class="rail" aria-label="Navegación lateral"> <!-- Columna fija a la izquierda, visible desde 1024px -->
+    <a class="rail__brand" href="#inicio" aria-label="Cristian Hércules, ir al inicio"><span class="monogram" aria-hidden="true">CH</span></a> <!-- Monograma que lleva al inicio -->
+    <nav aria-label="Secciones"> <!-- Navegación por secciones -->
+      <ul class="rail__list"> <!-- Lista de números romanos -->
+        <li><a class="rail__link" href="#inicio" data-nav-link><span class="rail__numeral">I</span><span class="rail__label">Inicio</span></a></li> <!-- El numeral se ve siempre; la etiqueta aparece al pasar el cursor o enfocar -->
+        <li><a class="rail__link" href="#filosofia" data-nav-link><span class="rail__numeral">II</span><span class="rail__label">Filosofía</span></a></li> <!-- Filosofía -->
+        <li><a class="rail__link" href="#trabajos" data-nav-link><span class="rail__numeral">III</span><span class="rail__label">Trabajos</span></a></li> <!-- Trabajos -->
+        <li><a class="rail__link" href="#servicios" data-nav-link><span class="rail__numeral">IV</span><span class="rail__label">Servicios</span></a></li> <!-- Servicios -->
+        <li><a class="rail__link" href="#trayectoria" data-nav-link><span class="rail__numeral">V</span><span class="rail__label">Trayectoria</span></a></li> <!-- Trayectoria -->
+        <li><a class="rail__link" href="#contacto" data-nav-link><span class="rail__numeral">VI</span><span class="rail__label">Contacto</span></a></li> <!-- Contacto -->
+      </ul> <!-- Fin de la lista -->
+    </nav> <!-- Fin de la navegación -->
+    <span class="rail__progress" aria-hidden="true"></span> <!-- Línea vertical de progreso de lectura -->
+  </aside> <!-- Fin del riel -->
+
+  <main id="contenido"> <!-- Contenido principal; destino del skip-link -->
+
+    <!-- ================================ I · INICIO ================================ -->
+    <section class="hero section--dark" id="inicio" aria-labelledby="hero-title"> <!-- Portada a pantalla completa; section--dark activa los colores del tema oscuro -->
+      <span class="hero__frame" aria-hidden="true"></span> <!-- Marco dorado fino alrededor de la portada (decorativo) -->
+      <span class="hero__monogram" aria-hidden="true">CH</span> <!-- Monograma gigante contorneado de fondo (decorativo) -->
+      <div class="container hero__inner"> <!-- Contenedor del contenido -->
+        <p class="hero__overline" data-hero-fade>Portafolio — Diseño gráfico</p> <!-- Antetítulo; data-hero-fade lo anima tras la carga -->
+        <h1 class="hero__title" id="hero-title"> <!-- Título principal (único h1); JS divide cada línea en palabras para animarlas -->
+          <span class="hero__line" data-split>Cristian Fernando</span> <!-- Primera línea: nombres -->
+          <span class="hero__line hero__line--accent" data-split>Hércules Serrano</span> <!-- Segunda línea: apellidos en cursiva dorada -->
+        </h1> <!-- Fin del título -->
+        <p class="hero__role" data-hero-fade>Diseñador gráfico especializado en identidad visual, dirección de arte y diseño editorial para marcas que buscan permanencia.</p> <!-- Propuesta de valor (REEMPLAZAR si aplica) -->
+        <div class="hero__meta" data-hero-fade> <!-- Estado y llamado a la acción -->
+          <span class="hero__status"><span class="hero__status-dot" aria-hidden="true"></span>Agenda abierta para nuevos proyectos</span> <!-- Disponibilidad con punto dorado pulsante -->
+          <a class="link-arrow" href="#trabajos">Ver trabajos <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a> <!-- Enlace con subrayado animado y flecha -->
+        </div> <!-- Fin del bloque meta -->
+      </div> <!-- Fin del contenedor -->
+      <a class="hero__scroll" href="#filosofia" aria-label="Ir a la sección Filosofía" data-hero-fade> <!-- Indicador de scroll que enlaza a la siguiente sección -->
+        <span class="hero__scroll-text" aria-hidden="true">Desliza</span> <!-- Texto visual -->
+        <span class="hero__scroll-line" aria-hidden="true"></span> <!-- Línea con un destello dorado que baja en bucle -->
+      </a> <!-- Fin del indicador -->
+    </section> <!-- Fin de Inicio -->
+
+    <!-- ============================== II · FILOSOFÍA ============================== -->
+    <section class="section section--light philosophy" id="filosofia" aria-labelledby="philosophy-title"> <!-- Sección clara (marfil) con biografía -->
+      <div class="container philosophy__grid"> <!-- Rejilla: retrato + texto -->
+        <figure class="portrait"> <!-- Retrato con marco dorado desplazado -->
+          <div class="portrait__frame" data-reveal="mask"> <!-- Marco de la foto; data-reveal="mask" lo descubre de abajo hacia arriba -->
+            <!-- REEMPLAZAR el span por: <img src="img/cristian.jpg" alt="Retrato de Cristian Hércules" width="600" height="750" loading="lazy" /> -->
+            <span class="portrait__placeholder" aria-hidden="true">CH</span> <!-- Monograma temporal mientras no hay fotografía -->
+          </div> <!-- Fin del marco -->
+          <figcaption class="portrait__caption" data-reveal>Cristian Hércules — Estudio</figcaption> <!-- Pie de foto -->
+        </figure> <!-- Fin del retrato -->
+        <div class="philosophy__content"> <!-- Columna de texto -->
+          <header class="section-head" data-reveal> <!-- Encabezado de sección: numeral + línea + etiqueta -->
+            <span class="section-head__numeral" aria-hidden="true">II</span> <!-- Numeral romano decorativo -->
+            <span class="section-head__rule" aria-hidden="true"></span> <!-- Línea separadora -->
+            <p class="section-head__label">Filosofía</p> <!-- Nombre de la sección -->
+          </header> <!-- Fin del encabezado -->
+          <h2 class="philosophy__statement" id="philosophy-title" data-reveal>Diseño marcas con <em>rigor</em>, oficio y una idea clara: que perduren en el tiempo.</h2> <!-- Declaración principal -->
+          <div class="philosophy__text" data-reveal style="--reveal-delay: 0.1s;"> <!-- Párrafos de biografía (REEMPLAZAR por texto real) -->
+            <p>Soy Cristian Fernando Hércules Serrano, diseñador gráfico. Creo en la disciplina de la retícula, en la tipografía bien elegida y en los sistemas visuales que funcionan igual de bien en una tarjeta que en una fachada.</p> <!-- Párrafo 1; su primera letra se muestra como capitular -->
+            <p>Trabajo de cerca con cada cliente para entender su historia y traducirla en una identidad sobria, coherente y memorable. Menos ruido, más intención.</p> <!-- Párrafo 2 -->
+          </div> <!-- Fin de los párrafos -->
+          <p class="philosophy__signature" data-reveal>Cristian Hércules</p> <!-- Firma en cursiva -->
+          <dl class="facts" data-reveal> <!-- Lista de definiciones: dato (dt) y valor (dd). REEMPLAZAR valores -->
+            <div class="facts__item"><dt>Especialidad</dt><dd>Identidad visual</dd></div> <!-- Dato 1; envolver dt/dd en div es válido en HTML5 y facilita el estilo -->
+            <div class="facts__item"><dt>Enfoque</dt><dd>Marcas premium y corporativas</dd></div> <!-- Dato 2 -->
+            <div class="facts__item"><dt>Herramientas</dt><dd>Illustrator · InDesign · Photoshop · Figma</dd></div> <!-- Dato 3 -->
+            <div class="facts__item"><dt>Idiomas</dt><dd>Español · Inglés</dd></div> <!-- Dato 4 -->
+          </dl> <!-- Fin de los datos -->
+        </div> <!-- Fin de la columna de texto -->
+      </div> <!-- Fin de la rejilla -->
+    </section> <!-- Fin de Filosofía -->
+
+    <!-- =============================== III · TRABAJOS =============================== -->
+    <section class="section section--dark works" id="trabajos" aria-labelledby="works-title"> <!-- Sección oscura con lista editorial de proyectos -->
+      <div class="container"> <!-- Contenedor centrado -->
+        <div class="works__head"> <!-- Encabezado de la sección -->
+          <header class="section-head" data-reveal> <!-- Numeral + línea + etiqueta -->
+            <span class="section-head__numeral" aria-hidden="true">III</span> <!-- Numeral -->
+            <span class="section-head__rule" aria-hidden="true"></span> <!-- Línea -->
+            <p class="section-head__label">Trabajos</p> <!-- Etiqueta -->
+          </header> <!-- Fin del encabezado -->
+          <h2 class="section-title" id="works-title" data-reveal>Trabajos <em>seleccionados</em> <sup class="works__count" id="worksCount">(06)</sup></h2> <!-- Título; JS actualiza el contador según el número real de proyectos -->
+          <p class="works__intro" data-reveal>Una selección de proyectos de identidad, packaging y diseño editorial. Abre cada uno para ver el caso completo.</p> <!-- Bajada -->
+        </div> <!-- Fin del encabezado -->
+
+        <ol class="works__list" id="worksList"> <!-- Lista ordenada de proyectos (REEMPLAZAR por proyectos reales) -->
+          <li class="work" data-reveal style="--tone-1: #1A2944; --tone-2: #C9A35F;"> <!-- Proyecto 1; --tone-1/--tone-2 definen los colores de su portada -->
+            <button class="work__row" type="button" data-case="caso-01" aria-haspopup="dialog"> <!-- Fila clicable; data-case apunta a su <template>; aria-haspopup avisa que abre un diálogo -->
+              <span class="work__index">01</span> <!-- Número del proyecto -->
+              <span class="work__title">Maison Ébano</span> <!-- Nombre del proyecto -->
+              <span class="work__type">Identidad visual</span> <!-- Disciplina -->
+              <span class="work__year">2025</span> <!-- Año -->
+              <span class="work__arrow" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" /></svg></span> <!-- Flecha diagonal que gira al pasar el cursor -->
+            </button> <!-- Fin de la fila -->
+          </li> <!-- Fin proyecto 1 -->
+          <li class="work" data-reveal style="--tone-1: #3B2A20; --tone-2: #D9B88A;"> <!-- Proyecto 2 -->
+            <button class="work__row" type="button" data-case="caso-02" aria-haspopup="dialog"> <!-- Fila clicable -->
+              <span class="work__index">02</span> <!-- Número -->
+              <span class="work__title">Café Altamira</span> <!-- Nombre -->
+              <span class="work__type">Packaging</span> <!-- Disciplina -->
+              <span class="work__year">2025</span> <!-- Año -->
+              <span class="work__arrow" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" /></svg></span> <!-- Flecha -->
+            </button> <!-- Fin de la fila -->
+          </li> <!-- Fin proyecto 2 -->
+          <li class="work" data-reveal style="--tone-1: #2A2A2E; --tone-2: #B9A68A;"> <!-- Proyecto 3 -->
+            <button class="work__row" type="button" data-case="caso-03" aria-haspopup="dialog"> <!-- Fila clicable -->
+              <span class="work__index">03</span> <!-- Número -->
+              <span class="work__title">Revista Umbral</span> <!-- Nombre -->
+              <span class="work__type">Diseño editorial</span> <!-- Disciplina -->
+              <span class="work__year">2024</span> <!-- Año -->
+              <span class="work__arrow" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" /></svg></span> <!-- Flecha -->
+            </button> <!-- Fin de la fila -->
+          </li> <!-- Fin proyecto 3 -->
+          <li class="work" data-reveal style="--tone-1: #13233A; --tone-2: #8FA3BF;"> <!-- Proyecto 4 -->
+            <button class="work__row" type="button" data-case="caso-04" aria-haspopup="dialog"> <!-- Fila clicable -->
+              <span class="work__index">04</span> <!-- Número -->
+              <span class="work__title">Vega &amp; Asociados</span> <!-- Nombre; &amp; es la forma correcta de escribir "&" en HTML -->
+              <span class="work__type">Branding corporativo</span> <!-- Disciplina -->
+              <span class="work__year">2024</span> <!-- Año -->
+              <span class="work__arrow" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" /></svg></span> <!-- Flecha -->
+            </button> <!-- Fin de la fila -->
+          </li> <!-- Fin proyecto 4 -->
+          <li class="work" data-reveal style="--tone-1: #4A1F2E; --tone-2: #E0A35C;"> <!-- Proyecto 5 -->
+            <button class="work__row" type="button" data-case="caso-05" aria-haspopup="dialog"> <!-- Fila clicable -->
+              <span class="work__index">05</span> <!-- Número -->
+              <span class="work__title">Festival Luz de Agosto</span> <!-- Nombre -->
+              <span class="work__type">Dirección de arte</span> <!-- Disciplina -->
+              <span class="work__year">2023</span> <!-- Año -->
+              <span class="work__arrow" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" /></svg></span> <!-- Flecha -->
+            </button> <!-- Fin de la fila -->
+          </li> <!-- Fin proyecto 5 -->
+          <li class="work" data-reveal style="--tone-1: #2B1A24; --tone-2: #B08D57;"> <!-- Proyecto 6 -->
+            <button class="work__row" type="button" data-case="caso-06" aria-haspopup="dialog"> <!-- Fila clicable -->
+              <span class="work__index">06</span> <!-- Número -->
+              <span class="work__title">Bodega Sierra</span> <!-- Nombre -->
+              <span class="work__type">Etiquetas</span> <!-- Disciplina -->
+              <span class="work__year">2023</span> <!-- Año -->
+              <span class="work__arrow" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" /></svg></span> <!-- Flecha -->
+            </button> <!-- Fin de la fila -->
+          </li> <!-- Fin proyecto 6 -->
+        </ol> <!-- Fin de la lista -->
+
+        <!-- Casos de estudio: <template> guarda HTML inerte (no se muestra ni se ejecuta) que JS clona dentro del panel lateral -->
+        <template id="caso-01"> <!-- Caso 1 (REEMPLAZAR) -->
+          <p class="case__lead">Identidad para una casa de muebles de autor que buscaba transmitir artesanía y lujo silencioso.</p> <!-- Entradilla -->
+          <dl class="case__meta"> <!-- Ficha técnica -->
+            <div><dt>Cliente</dt><dd>Maison Ébano</dd></div> <!-- Cliente -->
+            <div><dt>Año</dt><dd>2025</dd></div> <!-- Año -->
+            <div><dt>Alcance</dt><dd>Monograma, tipografía, papelería, señalética</dd></div> <!-- Entregables -->
+          </dl> <!-- Fin de la ficha -->
+          <h3 class="case__heading">El reto</h3> <!-- Subtítulo -->
+          <p class="case__text">La marca competía con firmas internacionales y su imagen anterior no reflejaba la calidad de sus piezas hechas a mano.</p> <!-- Problema -->
+          <h3 class="case__heading">La solución</h3> <!-- Subtítulo -->
+          <p class="case__text">Un monograma inspirado en las uniones de ebanistería, una paleta de madera oscura y dorado, y un sistema tipográfico serif aplicado con la misma precisión en etiquetas, catálogos y showroom.</p> <!-- Respuesta de diseño -->
+        </template> <!-- Fin caso 1 -->
+        <template id="caso-02"> <!-- Caso 2 -->
+          <p class="case__lead">Línea de empaques para un café de altura de producción limitada.</p> <!-- Entradilla -->
+          <dl class="case__meta"> <!-- Ficha -->
+            <div><dt>Cliente</dt><dd>Café Altamira</dd></div> <!-- Cliente -->
+            <div><dt>Año</dt><dd>2025</dd></div> <!-- Año -->
+            <div><dt>Alcance</dt><dd>Empaques, etiquetas, ilustración</dd></div> <!-- Entregables -->
+          </dl> <!-- Fin de la ficha -->
+          <h3 class="case__heading">El reto</h3> <!-- Subtítulo -->
+          <p class="case__text">Destacar en el anaquel de cafés de especialidad sin perder la sobriedad que exigía el origen del producto.</p> <!-- Problema -->
+          <h3 class="case__heading">La solución</h3> <!-- Subtítulo -->
+          <p class="case__text">Ilustraciones de estilo grabado del paisaje cafetalero, un código de color por variedad y acabados en hot stamping dorado sobre papel kraft.</p> <!-- Respuesta -->
+        </template> <!-- Fin caso 2 -->
+        <template id="caso-03"> <!-- Caso 3 -->
+          <p class="case__lead">Rediseño integral de una revista cultural trimestral.</p> <!-- Entradilla -->
+          <dl class="case__meta"> <!-- Ficha -->
+            <div><dt>Cliente</dt><dd>Revista Umbral</dd></div> <!-- Cliente -->
+            <div><dt>Año</dt><dd>2024</dd></div> <!-- Año -->
+            <div><dt>Alcance</dt><dd>Retícula, portadas, guía de estilo</dd></div> <!-- Entregables -->
+          </dl> <!-- Fin de la ficha -->
+          <h3 class="case__heading">El reto</h3> <!-- Subtítulo -->
+          <p class="case__text">Ordenar contenidos muy diversos —ensayo, fotografía, entrevistas— sin que la revista perdiera carácter.</p> <!-- Problema -->
+          <h3 class="case__heading">La solución</h3> <!-- Subtítulo -->
+          <p class="case__text">Una retícula de 12 columnas, portadas tipográficas de gran formato y una guía de estilo que permite al equipo maquetar cada número con autonomía.</p> <!-- Respuesta -->
+        </template> <!-- Fin caso 3 -->
+        <template id="caso-04"> <!-- Caso 4 -->
+          <p class="case__lead">Sistema de marca para una firma legal con tres décadas de trayectoria.</p> <!-- Entradilla -->
+          <dl class="case__meta"> <!-- Ficha -->
+            <div><dt>Cliente</dt><dd>Vega &amp; Asociados</dd></div> <!-- Cliente -->
+            <div><dt>Año</dt><dd>2024</dd></div> <!-- Año -->
+            <div><dt>Alcance</dt><dd>Logotipo, plantillas, presencia digital</dd></div> <!-- Entregables -->
+          </dl> <!-- Fin de la ficha -->
+          <h3 class="case__heading">El reto</h3> <!-- Subtítulo -->
+          <p class="case__text">Modernizar la imagen sin romper la confianza construida con clientes de larga data.</p> <!-- Problema -->
+          <h3 class="case__heading">La solución</h3> <!-- Subtítulo -->
+          <p class="case__text">Un logotipo tipográfico de proporciones clásicas, una paleta azul acero y plantillas documentales que unifican cada comunicación de la firma.</p> <!-- Respuesta -->
+        </template> <!-- Fin caso 4 -->
+        <template id="caso-05"> <!-- Caso 5 -->
+          <p class="case__lead">Dirección de arte para un festival cultural de tres días.</p> <!-- Entradilla -->
+          <dl class="case__meta"> <!-- Ficha -->
+            <div><dt>Cliente</dt><dd>Festival Luz de Agosto</dd></div> <!-- Cliente -->
+            <div><dt>Año</dt><dd>2023</dd></div> <!-- Año -->
+            <div><dt>Alcance</dt><dd>Cartelería, redes sociales, señalética</dd></div> <!-- Entregables -->
+          </dl> <!-- Fin de la ficha -->
+          <h3 class="case__heading">El reto</h3> <!-- Subtítulo -->
+          <p class="case__text">Crear una identidad reconocible que funcionara igual en carteles, pantallas y señalética al aire libre.</p> <!-- Problema -->
+          <h3 class="case__heading">La solución</h3> <!-- Subtítulo -->
+          <p class="case__text">Un sistema gráfico basado en haces de luz geométricos y una tipografía condensada que se adapta a cada formato sin perder coherencia.</p> <!-- Respuesta -->
+        </template> <!-- Fin caso 5 -->
+        <template id="caso-06"> <!-- Caso 6 -->
+          <p class="case__lead">Etiquetas para una línea de vinos y licores artesanales.</p> <!-- Entradilla -->
+          <dl class="case__meta"> <!-- Ficha -->
+            <div><dt>Cliente</dt><dd>Bodega Sierra</dd></div> <!-- Cliente -->
+            <div><dt>Año</dt><dd>2023</dd></div> <!-- Año -->
+            <div><dt>Alcance</dt><dd>Etiquetas, troqueles, cajas de regalo</dd></div> <!-- Entregables -->
+          </dl> <!-- Fin de la ficha -->
+          <h3 class="case__heading">El reto</h3> <!-- Subtítulo -->
+          <p class="case__text">Diferenciar cada variedad manteniendo una familia visual clara y elegante.</p> <!-- Problema -->
+          <h3 class="case__heading">La solución</h3> <!-- Subtítulo -->
+          <p class="case__text">Etiquetas con troqueles personalizados, relieve en seco y un color por variedad que guía al cliente sin necesidad de leer.</p> <!-- Respuesta -->
+        </template> <!-- Fin caso 6 -->
+      </div> <!-- Fin del contenedor -->
+
+      <div class="works__preview" id="workPreview" aria-hidden="true"> <!-- Vista previa flotante que sigue al cursor (solo con mouse); decorativa -->
+        <div class="works__preview-inner"><span class="works__preview-initials"></span></div> <!-- Tarjeta con degradado e iniciales del proyecto -->
+      </div> <!-- Fin de la vista previa -->
+    </section> <!-- Fin de Trabajos -->
+
+    <!-- =============================== IV · SERVICIOS =============================== -->
+    <section class="section section--light services" id="servicios" aria-labelledby="services-title"> <!-- Sección clara con acordeón de servicios -->
+      <div class="container services__grid"> <!-- Rejilla: introducción fija + acordeón -->
+        <div class="services__intro"> <!-- Columna introductoria (queda fija al hacer scroll en escritorio) -->
+          <header class="section-head" data-reveal> <!-- Encabezado de sección -->
+            <span class="section-head__numeral" aria-hidden="true">IV</span> <!-- Numeral -->
+            <span class="section-head__rule" aria-hidden="true"></span> <!-- Línea -->
+            <p class="section-head__label">Servicios</p> <!-- Etiqueta -->
+          </header> <!-- Fin del encabezado -->
+          <h2 class="section-title" id="services-title" data-reveal>Cómo puedo <em>ayudarte</em></h2> <!-- Título -->
+          <p class="services__text" data-reveal>Cada proyecto empieza por entender el negocio. Desde ahí construyo soluciones visuales precisas, pensadas para durar.</p> <!-- Bajada -->
+          <a class="btn btn--dark" href="#contacto" data-reveal>Solicitar propuesta <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a> <!-- Llamado a la acción -->
+        </div> <!-- Fin de la introducción -->
+        <div class="services__list" data-reveal> <!-- Acordeón nativo con <details>/<summary>: accesible por teclado sin JavaScript -->
+          <details class="service" name="servicios" open> <!-- name="servicios" agrupa los <details>: al abrir uno se cierran los demás (HTML nativo); open = abierto al cargar -->
+            <summary class="service__summary"> <!-- Cabecera clicable del acordeón -->
+              <span class="service__index">01</span> <!-- Número -->
+              <span class="service__title">Identidad corporativa</span> <!-- Nombre del servicio -->
+              <span class="service__icon" aria-hidden="true"></span> <!-- Signo "+" que se convierte en "−" al abrir -->
+            </summary> <!-- Fin de la cabecera -->
+            <div class="service__content"> <!-- Contenido desplegable -->
+              <p>Construyo el sistema visual completo de tu marca para que se reconozca y se mantenga coherente en cada punto de contacto.</p> <!-- Descripción -->
+              <ul class="service__deliverables"> <!-- Entregables -->
+                <li>Logotipo y variantes</li> <!-- Entregable -->
+                <li>Paleta y sistema tipográfico</li> <!-- Entregable -->
+                <li>Papelería corporativa</li> <!-- Entregable -->
+                <li>Manual de marca</li> <!-- Entregable -->
+              </ul> <!-- Fin de entregables -->
+            </div> <!-- Fin del contenido -->
+          </details> <!-- Fin servicio 1 -->
+          <details class="service" name="servicios"> <!-- Servicio 2 (cerrado al cargar) -->
+            <summary class="service__summary"> <!-- Cabecera -->
+              <span class="service__index">02</span> <!-- Número -->
+              <span class="service__title">Dirección de arte</span> <!-- Nombre -->
+              <span class="service__icon" aria-hidden="true"></span> <!-- Ícono +/− -->
+            </summary> <!-- Fin de la cabecera -->
+            <div class="service__content"> <!-- Contenido -->
+              <p>Defino el lenguaje visual de campañas y producciones, y acompaño cada etapa para que el resultado final respete la idea original.</p> <!-- Descripción -->
+              <ul class="service__deliverables"> <!-- Entregables -->
+                <li>Concepto de campaña</li> <!-- Entregable -->
+                <li>Dirección de sesiones fotográficas</li> <!-- Entregable -->
+                <li>Piezas para redes sociales</li> <!-- Entregable -->
+                <li>Supervisión de producción</li> <!-- Entregable -->
+              </ul> <!-- Fin de entregables -->
+            </div> <!-- Fin del contenido -->
+          </details> <!-- Fin servicio 2 -->
+          <details class="service" name="servicios"> <!-- Servicio 3 -->
+            <summary class="service__summary"> <!-- Cabecera -->
+              <span class="service__index">03</span> <!-- Número -->
+              <span class="service__title">Diseño editorial</span> <!-- Nombre -->
+              <span class="service__icon" aria-hidden="true"></span> <!-- Ícono +/− -->
+            </summary> <!-- Fin de la cabecera -->
+            <div class="service__content"> <!-- Contenido -->
+              <p>Diseño publicaciones con jerarquía clara y lectura cómoda, desde la retícula hasta los artes finales para imprenta.</p> <!-- Descripción -->
+              <ul class="service__deliverables"> <!-- Entregables -->
+                <li>Libros y revistas</li> <!-- Entregable -->
+                <li>Catálogos de producto</li> <!-- Entregable -->
+                <li>Informes anuales</li> <!-- Entregable -->
+                <li>Presentaciones corporativas</li> <!-- Entregable -->
+              </ul> <!-- Fin de entregables -->
+            </div> <!-- Fin del contenido -->
+          </details> <!-- Fin servicio 3 -->
+          <details class="service" name="servicios"> <!-- Servicio 4 -->
+            <summary class="service__summary"> <!-- Cabecera -->
+              <span class="service__index">04</span> <!-- Número -->
+              <span class="service__title">Packaging y etiquetas</span> <!-- Nombre -->
+              <span class="service__icon" aria-hidden="true"></span> <!-- Ícono +/− -->
+            </summary> <!-- Fin de la cabecera -->
+            <div class="service__content"> <!-- Contenido -->
+              <p>Creo empaques que destacan en el anaquel y cuidan cada detalle de producción: materiales, troqueles y acabados especiales.</p> <!-- Descripción -->
+              <ul class="service__deliverables"> <!-- Entregables -->
+                <li>Diseño de empaques</li> <!-- Entregable -->
+                <li>Etiquetas y sellos</li> <!-- Entregable -->
+                <li>Troqueles y acabados</li> <!-- Entregable -->
+                <li>Artes finales para imprenta</li> <!-- Entregable -->
+              </ul> <!-- Fin de entregables -->
+            </div> <!-- Fin del contenido -->
+          </details> <!-- Fin servicio 4 -->
+        </div> <!-- Fin del acordeón -->
+      </div> <!-- Fin de la rejilla -->
+    </section> <!-- Fin de Servicios -->
+
+    <!-- ============================== V · TRAYECTORIA ============================== -->
+    <section class="section section--dark journey" id="trayectoria" aria-labelledby="journey-title"> <!-- Sección oscura con línea de tiempo -->
+      <div class="container journey__grid"> <!-- Rejilla: introducción + línea de tiempo -->
+        <div class="journey__intro"> <!-- Columna introductoria -->
+          <header class="section-head" data-reveal> <!-- Encabezado de sección -->
+            <span class="section-head__numeral" aria-hidden="true">V</span> <!-- Numeral -->
+            <span class="section-head__rule" aria-hidden="true"></span> <!-- Línea -->
+            <p class="section-head__label">Trayectoria</p> <!-- Etiqueta -->
+          </header> <!-- Fin del encabezado -->
+          <h2 class="section-title" id="journey-title" data-reveal>Una carrera construida <em>con oficio</em></h2> <!-- Título -->
+          <p class="journey__text" data-reveal>Más de una década entre estudios, agencias y proyectos independientes, siempre con la misma obsesión por el detalle.</p> <!-- Bajada (REEMPLAZAR) -->
+          <a class="link-arrow" href="cv-cristian-hercules.pdf" download data-reveal>Descargar CV <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M6 10l6 6 6-6M5 20h14" /></svg></a> <!-- REEMPLAZAR: coloca el PDF del CV junto a index.html con este nombre; download sugiere descargarlo -->
+        </div> <!-- Fin de la introducción -->
+        <ol class="timeline" id="timeline"> <!-- Línea de tiempo; JS llena su línea dorada según el avance del scroll -->
+          <li class="timeline__item" data-reveal> <!-- Hito 1 (REEMPLAZAR todos los hitos) -->
+            <p class="timeline__date">2024 — Hoy</p> <!-- Periodo -->
+            <h3 class="timeline__role">Diseñador gráfico independiente</h3> <!-- Cargo -->
+            <p class="timeline__place">Estudio propio</p> <!-- Lugar -->
+            <p class="timeline__text">Identidad visual y dirección de arte para marcas locales e internacionales.</p> <!-- Descripción -->
+          </li> <!-- Fin hito 1 -->
+          <li class="timeline__item" data-reveal> <!-- Hito 2 -->
+            <p class="timeline__date">2020 — 2024</p> <!-- Periodo -->
+            <h3 class="timeline__role">Director de arte</h3> <!-- Cargo -->
+            <p class="timeline__place">Agencia creativa</p> <!-- Lugar -->
+            <p class="timeline__text">Liderazgo de un equipo de diseño en campañas de marca y lanzamientos de producto.</p> <!-- Descripción -->
+          </li> <!-- Fin hito 2 -->
+          <li class="timeline__item" data-reveal> <!-- Hito 3 -->
+            <p class="timeline__date">2016 — 2020</p> <!-- Periodo -->
+            <h3 class="timeline__role">Diseñador gráfico senior</h3> <!-- Cargo -->
+            <p class="timeline__place">Estudio de diseño</p> <!-- Lugar -->
+            <p class="timeline__text">Proyectos de branding, packaging y diseño editorial para clientes corporativos.</p> <!-- Descripción -->
+          </li> <!-- Fin hito 3 -->
+          <li class="timeline__item" data-reveal> <!-- Hito 4 -->
+            <p class="timeline__date">2011 — 2015</p> <!-- Periodo -->
+            <h3 class="timeline__role">Licenciatura en Diseño Gráfico</h3> <!-- Formación -->
+            <p class="timeline__place">Universidad</p> <!-- Institución -->
+            <p class="timeline__text">Formación en tipografía, sistemas de identidad y producción gráfica.</p> <!-- Descripción -->
+          </li> <!-- Fin hito 4 -->
+        </ol> <!-- Fin de la línea de tiempo -->
+      </div> <!-- Fin de la rejilla -->
+    </section> <!-- Fin de Trayectoria -->
+
+    <!-- =============================== VI · CONTACTO =============================== -->
+    <section class="section section--light contact" id="contacto" aria-labelledby="contact-title"> <!-- Sección clara de contacto -->
+      <div class="container contact__grid"> <!-- Rejilla: datos + formulario -->
+        <div class="contact__intro"> <!-- Columna de datos -->
+          <header class="section-head" data-reveal> <!-- Encabezado de sección -->
+            <span class="section-head__numeral" aria-hidden="true">VI</span> <!-- Numeral -->
+            <span class="section-head__rule" aria-hidden="true"></span> <!-- Línea -->
+            <p class="section-head__label">Contacto</p> <!-- Etiqueta -->
+          </header> <!-- Fin del encabezado -->
+          <h2 class="section-title" id="contact-title" data-reveal>¿Tienes un proyecto en mente? <em>Conversemos.</em></h2> <!-- Título -->
+          <p class="contact__text" data-reveal>Cuéntame sobre tu marca y tus objetivos. Respondo cada mensaje personalmente.</p> <!-- Bajada -->
+          <div class="contact__email" data-reveal> <!-- Bloque de correo directo -->
+            <span class="contact__label">Escríbeme directamente</span> <!-- Etiqueta -->
+            <a class="contact__email-link" href="mailto:cristian@example.com">cristian@example.com</a> <!-- Correo (REEMPLAZAR); mailto abre el cliente de correo -->
+            <button class="contact__copy" type="button" data-copy="cristian@example.com"> <!-- Copia el correo al portapapeles; data-copy contiene el texto (REEMPLAZAR) -->
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" /><path d="M5 15V5a1 1 0 0 1 1-1h10" /></svg> <!-- Ícono de copiar -->
+              Copiar correo <!-- Texto del botón -->
+            </button> <!-- Fin del botón -->
+          </div> <!-- Fin del bloque de correo -->
+          <ul class="social" data-reveal aria-label="Redes sociales"> <!-- Redes (REEMPLAZAR "tu-usuario") -->
+            <li><a href="https://www.behance.net/tu-usuario" target="_blank" rel="noopener noreferrer">Behance <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></a></li> <!-- target=_blank abre otra pestaña; rel=noopener noreferrer protege esta página -->
+            <li><a href="https://www.instagram.com/tu-usuario" target="_blank" rel="noopener noreferrer">Instagram <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></a></li> <!-- Instagram -->
+            <li><a href="https://www.linkedin.com/in/tu-usuario" target="_blank" rel="noopener noreferrer">LinkedIn <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></a></li> <!-- LinkedIn -->
+          </ul> <!-- Fin de redes -->
+        </div> <!-- Fin de la columna de datos -->
+
+        <form class="contact-form" id="contactForm" novalidate data-reveal> <!-- Formulario; novalidate desactiva los globos nativos y JS muestra mensajes propios usando la Constraint Validation API -->
+          <div class="contact-form__row"> <!-- Fila de dos campos en pantallas medianas -->
+            <div class="field"> <!-- Campo con etiqueta flotante -->
+              <input class="field__input" type="text" id="nombre" name="nombre" placeholder=" " autocomplete="name" required minlength="2" aria-describedby="nombre-error" /> <!-- required y minlength son reglas nativas; placeholder=" " permite detectar si está vacío con :placeholder-shown -->
+              <label class="field__label" for="nombre">Nombre completo</label> <!-- Etiqueta DESPUÉS del input para poder estilizarla con el selector "+" -->
+              <p class="field__error" id="nombre-error"></p> <!-- Mensaje de error (JS) -->
+            </div> <!-- Fin campo nombre -->
+            <div class="field"> <!-- Campo correo -->
+              <input class="field__input" type="email" id="correo" name="correo" placeholder=" " autocomplete="email" inputmode="email" required pattern="[^@\s]+@[^@\s]+\.[^@\s]{2,}" aria-describedby="correo-error" /> <!-- type=email valida el formato; pattern exige además un dominio con extensión -->
+              <label class="field__label" for="correo">Correo electrónico</label> <!-- Etiqueta -->
+              <p class="field__error" id="correo-error"></p> <!-- Error -->
+            </div> <!-- Fin campo correo -->
+          </div> <!-- Fin de la fila -->
+          <div class="field"> <!-- Campo empresa (opcional) -->
+            <input class="field__input" type="text" id="empresa" name="empresa" placeholder=" " autocomplete="organization" /> <!-- Sin required: es opcional -->
+            <label class="field__label" for="empresa">Empresa o marca (opcional)</label> <!-- Etiqueta -->
+          </div> <!-- Fin campo empresa -->
+          <fieldset class="budget"> <!-- fieldset agrupa opciones relacionadas; legend las nombra para lectores de pantalla -->
+            <legend class="budget__legend">Presupuesto estimado (USD)</legend> <!-- Título del grupo -->
+            <div class="budget__options"> <!-- Opciones tipo "píldora" -->
+              <label class="budget__option"><input type="radio" name="presupuesto" value="por-definir" checked /><span>Por definir</span></label> <!-- Radio nativo (accesible con flechas del teclado) estilizado con el span -->
+              <label class="budget__option"><input type="radio" name="presupuesto" value="menos-1000" /><span>Menos de $1,000</span></label> <!-- Opción 2 -->
+              <label class="budget__option"><input type="radio" name="presupuesto" value="1000-3000" /><span>$1,000 – $3,000</span></label> <!-- Opción 3 -->
+              <label class="budget__option"><input type="radio" name="presupuesto" value="mas-3000" /><span>Más de $3,000</span></label> <!-- Opción 4 -->
+            </div> <!-- Fin de opciones -->
+          </fieldset> <!-- Fin del grupo -->
+          <div class="field"> <!-- Campo mensaje -->
+            <textarea class="field__input" id="mensaje" name="mensaje" rows="5" placeholder=" " required minlength="20" aria-describedby="mensaje-error"></textarea> <!-- Mensaje de al menos 20 caracteres -->
+            <label class="field__label" for="mensaje">Cuéntame sobre tu proyecto</label> <!-- Etiqueta -->
+            <p class="field__error" id="mensaje-error"></p> <!-- Error -->
+          </div> <!-- Fin campo mensaje -->
+          <div class="contact-form__honeypot" aria-hidden="true"> <!-- Campo trampa anti-spam: invisible para personas, los bots suelen llenarlo -->
+            <label for="sitio_web">No completes este campo</label> <!-- Etiqueta -->
+            <input type="text" id="sitio_web" name="sitio_web" tabindex="-1" autocomplete="off" /> <!-- Fuera del orden de tabulación -->
+          </div> <!-- Fin del campo trampa -->
+          <button class="btn btn--dark contact-form__submit" type="submit"> <!-- Botón de envío -->
+            <span class="btn__text">Enviar mensaje</span> <!-- Texto que JS cambia a "Enviando…" -->
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg> <!-- Flecha -->
+          </button> <!-- Fin del botón -->
+        </form> <!-- Fin del formulario -->
+      </div> <!-- Fin de la rejilla -->
+    </section> <!-- Fin de Contacto -->
+
+  </main> <!-- Fin del contenido principal -->
+
+  <!-- ================================ PIE DE PÁGINA ================================ -->
+  <footer class="footer" id="footer"> <!-- Pie de página -->
+    <div class="container"> <!-- Contenedor -->
+      <p class="footer__name" aria-hidden="true">Cristian <em>Hércules</em></p> <!-- Nombre monumental decorativo -->
+      <div class="footer__bottom"> <!-- Fila inferior -->
+        <p>© <span id="year">2026</span> Cristian Fernando Hércules Serrano. Todos los derechos reservados.</p> <!-- Copyright; JS actualiza el año -->
+        <a class="footer__top" href="#inicio">Volver arriba ↑</a> <!-- Enlace al inicio -->
+      </div> <!-- Fin de la fila -->
+    </div> <!-- Fin del contenedor -->
+  </footer> <!-- Fin del pie -->
+
+  <!-- ========================= PANEL DE CASO DE ESTUDIO ========================= -->
+  <dialog class="drawer" id="caseDrawer" aria-labelledby="caseTitle"> <!-- <dialog> nativo mostrado como panel lateral: gestiona foco, Escape y fondo bloqueado -->
+    <header class="drawer__header"> <!-- Cabecera fija del panel -->
+      <p class="drawer__counter"><span id="caseIndex">01</span> / <span id="caseTotal">06</span></p> <!-- Posición del caso actual -->
+      <button class="drawer__close" type="button" data-drawer-close aria-label="Cerrar caso de estudio"> <!-- Botón cerrar -->
+        Cerrar <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg> <!-- Texto + ícono "×" -->
+      </button> <!-- Fin del botón -->
+    </header> <!-- Fin de la cabecera -->
+    <div class="drawer__cover" id="caseCover" aria-hidden="true"><span class="drawer__initials" id="caseInitials"></span></div> <!-- Portada con los colores del proyecto -->
+    <div class="drawer__body"> <!-- Cuerpo del caso -->
+      <p class="drawer__type" id="caseType"></p> <!-- Disciplina y año (JS) -->
+      <h2 class="drawer__title" id="caseTitle"></h2> <!-- Título (JS); nombra el diálogo -->
+      <div class="drawer__content" id="caseContent"></div> <!-- Aquí JS clona el <template> del caso -->
+    </div> <!-- Fin del cuerpo -->
+    <nav class="drawer__nav" aria-label="Navegar entre casos"> <!-- Navegación anterior/siguiente -->
+      <button class="drawer__nav-btn" type="button" data-drawer-step="-1"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6" /></svg> Anterior</button> <!-- data-drawer-step indica cuánto avanzar -->
+      <button class="drawer__nav-btn" type="button" data-drawer-step="1">Siguiente <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></button> <!-- Siguiente caso -->
+    </nav> <!-- Fin de la navegación -->
+  </dialog> <!-- Fin del panel -->
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div> <!-- Notificación flotante; role=status la anuncia a lectores de pantalla -->
+
+</body> <!-- Fin del cuerpo -->
+</html> <!-- Fin del documento -->

@@ -1,0 +1,1935 @@
+/* =============================================================================
+   styles.css — Portafolio Cristian Fernando Hércules Serrano
+   -----------------------------------------------------------------------------
+   Dirección visual: elegante y sobria. Azul marino profundo, marfil y dorado;
+   serif clásica (Cormorant Garamond) con una sans geométrica (Jost); esquinas
+   rectas, líneas finas y mucho espacio en blanco.
+
+   Metodología:
+   · Mobile-first: estilos base para móvil; min-width añade mejoras.
+   · BEM para las clases; atributos data-* solo para estados manejados por JS.
+   · Tokens de diseño en :root.
+   · TEMA CONTEXTUAL: cada sección define --accent, --muted y --line según sea
+     clara u oscura; los componentes usan esas variables y se adaptan solos
+     al fondo donde se colocan, sin duplicar reglas.
+
+   Índice:
+    1. Tokens                  11. Trabajos y vista previa
+    2. Reset                   12. Panel de caso de estudio
+    3. Base y temas            13. Servicios (acordeón)
+    4. Utilidades              14. Trayectoria (línea de tiempo)
+    5. Componentes             15. Contacto y formulario
+    6. Pantalla de carga       16. Pie de página y notificación
+    7. Barra superior y menú   17. Animaciones
+    8. Riel lateral            18. Media queries
+    9. Hero                    19. Movimiento reducido
+   10. Filosofía
+   ============================================================================= */
+
+
+/* =============================================================================
+   1. TOKENS DE DISEÑO
+   ============================================================================= */
+:root { /* Variables globales disponibles en todo el documento */
+  /* --- Azules marinos (de más oscuro a más claro) --- */
+  --navy-950: #070E1A; /* Casi negro azulado: telón de carga, menú y pie */
+  --navy-900: #0B1424; /* Fondo principal oscuro */
+  --navy-800: #111D33; /* Variante para alternar secciones oscuras */
+  --navy-700: #1A2944; /* Marino medio para degradados */
+
+  /* --- Marfil --- */
+  --ivory: #F5F0E6; /* Fondo de las secciones claras */
+  --ivory-dark: #EDE6D8; /* Marfil más profundo para superficies */
+
+  /* --- Dorados --- */
+  --gold: #C9A35F; /* Dorado principal (sobre marino: contraste ≈ 7.7:1) */
+  --gold-light: #E2C892; /* Dorado claro para brillos */
+  --gold-ink: #7A5C28; /* Dorado oscuro para TEXTO sobre marfil (≈ 5.4:1, cumple AA) */
+
+  /* --- Textos --- */
+  --ink: #14203A; /* Texto principal sobre marfil */
+  --ink-muted: #4F5A70; /* Texto secundario sobre marfil (≈ 6:1) */
+  --text-light: #EDE8DC; /* Texto principal sobre marino */
+  --text-light-muted: #A9B1C2; /* Texto secundario sobre marino (≈ 8.5:1) */
+
+  /* --- Líneas y estados --- */
+  --line-light: rgba(237, 232, 220, 0.14); /* Líneas finas sobre fondo oscuro */
+  --line-dark: rgba(20, 32, 58, 0.16); /* Líneas finas sobre fondo claro */
+  --error: #B3261E; /* Rojo de error (≈ 5.7:1 sobre marfil) */
+
+  /* --- Tipografía --- */
+  --font-serif: 'Cormorant Garamond', 'Times New Roman', Georgia, serif; /* Títulos; respaldo serif del sistema */
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif; /* Texto e interfaz */
+
+  /* --- Layout --- */
+  --rail-w: 88px; /* Ancho del riel lateral de escritorio */
+  --topbar-h: 64px; /* Alto de la barra superior móvil */
+  --container: 1200px; /* Ancho máximo del contenido */
+  --space-section: clamp(5rem, 12vw, 9.5rem); /* Espacio vertical de las secciones (fluido) */
+
+  /* --- Movimiento --- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* Salida suave y prolongada: sensación "premium" */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* Para telones y paneles que entran y salen */
+
+  /* --- Tema por defecto (oscuro) --- */
+  --accent: var(--gold); /* Color de acento del contexto actual */
+  --muted: var(--text-light-muted); /* Texto secundario del contexto actual */
+  --line: var(--line-light); /* Color de línea del contexto actual */
+
+  interpolate-size: allow-keywords; /* CSS moderno: permite animar hacia/desde "auto" (lo usa el acordeón); se ignora sin soporte */
+}
+
+
+/* =============================================================================
+   2. RESET
+   ============================================================================= */
+*, *::before, *::after { /* Todos los elementos y pseudo-elementos */
+  box-sizing: border-box; /* El ancho incluye padding y borde */
+  margin: 0; /* Sin márgenes por defecto */
+  padding: 0; /* Sin rellenos por defecto */
+}
+
+html { /* Raíz */
+  scroll-padding-top: var(--topbar-h); /* Al saltar a un #ancla deja espacio para la barra fija */
+  -webkit-text-size-adjust: 100%; /* Evita que iOS agrande el texto al girar */
+}
+
+img, svg { /* Imágenes y gráficos */
+  display: block; /* Sin espacio fantasma inferior */
+  max-width: 100%; /* Nunca desbordan */
+}
+
+a { /* Enlaces */
+  color: inherit; /* Heredan el color del contexto */
+  text-decoration: none; /* Sin subrayado por defecto */
+}
+
+button, input, textarea { /* Controles */
+  font: inherit; /* Heredan la tipografía */
+  color: inherit; /* Heredan el color */
+}
+
+button { /* Botones */
+  background: none; /* Sin fondo nativo */
+  border: none; /* Sin borde nativo */
+  cursor: pointer; /* Cursor de mano */
+}
+
+ul, ol { /* Listas */
+  list-style: none; /* Sin viñetas */
+}
+
+fieldset { /* Grupos de formulario */
+  border: 0; /* Sin el borde biselado por defecto */
+  min-width: 0; /* Evita que el fieldset desborde en contenedores estrechos */
+}
+
+:focus-visible { /* Foco visible al navegar con teclado */
+  outline: 2px solid var(--accent); /* Usa el acento del contexto: dorado sobre marino, dorado oscuro sobre marfil */
+  outline-offset: 4px; /* Separación del anillo */
+}
+
+::selection { /* Texto seleccionado */
+  background: var(--gold); /* Fondo dorado */
+  color: var(--navy-950); /* Texto marino */
+}
+
+
+/* =============================================================================
+   3. BASE Y TEMAS
+   ============================================================================= */
+body { /* Cuerpo */
+  font-family: var(--font-sans); /* Tipografía de texto */
+  font-size: 1.0625rem; /* 17px: lectura cómoda */
+  font-weight: 400; /* Peso normal */
+  line-height: 1.7; /* Interlineado amplio */
+  color: var(--text-light); /* Texto claro por defecto */
+  background: var(--navy-900); /* Fondo marino */
+  -webkit-font-smoothing: antialiased; /* Suavizado en macOS/iOS */
+  -moz-osx-font-smoothing: grayscale; /* Suavizado en Firefox/macOS */
+}
+
+body.no-scroll { /* Menú o panel abierto (JS) */
+  overflow: hidden; /* Bloquea el scroll del fondo */
+}
+
+h1, h2, h3 { /* Encabezados */
+  font-weight: 500; /* Peso medio: la serif luce mejor sin exceso de grosor */
+  text-wrap: balance; /* Reparte palabras entre líneas de forma equilibrada */
+}
+
+p { /* Párrafos */
+  text-wrap: pretty; /* Evita palabras sueltas al final */
+}
+
+.section { /* Sección genérica */
+  position: relative; /* Referencia para elementos absolutos */
+  padding-block: var(--space-section); /* Espacio vertical */
+}
+
+.section--dark { /* Tema oscuro */
+  background: var(--navy-900); /* Fondo marino */
+  color: var(--text-light); /* Texto claro */
+  --accent: var(--gold); /* Acento dorado */
+  --muted: var(--text-light-muted); /* Secundario gris azulado */
+  --line: var(--line-light); /* Líneas claras translúcidas */
+}
+
+.section--light { /* Tema claro */
+  background: var(--ivory); /* Fondo marfil */
+  color: var(--ink); /* Texto marino */
+  --accent: var(--gold-ink); /* Acento dorado oscuro (legible sobre marfil) */
+  --muted: var(--ink-muted); /* Secundario gris */
+  --line: var(--line-dark); /* Líneas oscuras translúcidas */
+}
+
+
+/* =============================================================================
+   4. UTILIDADES
+   ============================================================================= */
+.container { /* Envoltura centrada */
+  width: min(100% - 3rem, var(--container)); /* El menor entre (ancho − 48px) y 1200px */
+  margin-inline: auto; /* Centrado horizontal */
+}
+
+.sr-only { /* Texto solo para lectores de pantalla */
+  position: absolute; /* Fuera del flujo */
+  width: 1px; /* Mínimo */
+  height: 1px; /* Mínimo */
+  margin: -1px; /* Fuera del área visible */
+  overflow: hidden; /* Recorta */
+  clip: rect(0, 0, 0, 0); /* Recorte total */
+  white-space: nowrap; /* Sin reflujo */
+  border: 0; /* Sin borde */
+}
+
+.skip-link { /* Enlace "Saltar al contenido" */
+  position: fixed; /* Sobre la página */
+  top: -100px; /* Escondido */
+  left: 1rem; /* Margen izquierdo */
+  z-index: 1100; /* Encima incluso de la pantalla de carga */
+  padding: 0.8rem 1.4rem; /* Área de clic */
+  background: var(--gold); /* Fondo dorado */
+  color: var(--navy-950); /* Texto marino */
+  font-size: 0.875rem; /* 14px */
+  transition: top 0.3s var(--ease-out); /* Entrada suave */
+}
+
+.skip-link:focus { /* Al enfocarlo con Tab */
+  top: 1rem; /* Se hace visible */
+}
+
+.icon { /* Íconos SVG de línea */
+  width: 18px; /* Ancho */
+  height: 18px; /* Alto */
+  flex-shrink: 0; /* No se encogen en flexbox */
+  fill: none; /* Sin relleno */
+  stroke: currentColor; /* Trazo del color del texto */
+  stroke-width: 1.5; /* Trazo fino, acorde al estilo */
+  stroke-linecap: round; /* Extremos redondeados */
+  stroke-linejoin: round; /* Uniones redondeadas */
+}
+
+
+/* =============================================================================
+   5. COMPONENTES REUTILIZABLES
+   ============================================================================= */
+.monogram { /* Monograma "CH" enmarcado */
+  display: grid; /* Para centrar */
+  place-items: center; /* Centrado en ambos ejes */
+  width: 44px; /* Ancho */
+  height: 44px; /* Alto */
+  border: 1px solid var(--gold); /* Marco dorado fino */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.25rem; /* 20px */
+  font-style: italic; /* Cursiva */
+  font-weight: 500; /* Peso medio */
+  line-height: 1; /* Sin interlineado extra */
+  color: var(--gold); /* Dorado */
+}
+
+.section-head { /* Encabezado: numeral + línea + etiqueta */
+  display: flex; /* En fila */
+  align-items: center; /* Centrado vertical */
+  gap: 1rem; /* Separación */
+  margin-bottom: 1.75rem; /* Separación con el título */
+}
+
+.section-head__numeral { /* Numeral romano */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.5rem; /* 24px */
+  font-style: italic; /* Cursiva */
+  line-height: 1; /* Compacto */
+  color: var(--accent); /* Acento del contexto */
+}
+
+.section-head__rule { /* Línea separadora */
+  width: 48px; /* Largo */
+  height: 1px; /* Grosor */
+  background: var(--accent); /* Acento */
+}
+
+.section-head__label { /* Nombre de la sección */
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500; /* Peso medio */
+  letter-spacing: 0.3em; /* Espaciado amplio: estilo editorial */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--muted); /* Secundario */
+}
+
+.section-title { /* Títulos h2 */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(2.5rem, 6vw, 4.5rem); /* Fluido entre 40px y 72px */
+  line-height: 1.05; /* Compacto */
+  letter-spacing: -0.01em; /* Ligeramente apretado */
+}
+
+.section-title em, .philosophy__statement em { /* Palabras destacadas dentro de títulos */
+  font-style: italic; /* Cursiva */
+  color: var(--accent); /* Acento */
+}
+
+.btn { /* Botón base: rectangular, sin radios */
+  display: inline-flex; /* Para alinear texto e ícono */
+  align-items: center; /* Centrado vertical */
+  gap: 0.8rem; /* Separación texto-ícono */
+  min-height: 54px; /* Altura táctil generosa */
+  padding: 0 2rem; /* Relleno horizontal */
+  border: 1px solid transparent; /* Borde reservado */
+  font-size: 0.78rem; /* ~12.5px */
+  font-weight: 500; /* Peso medio */
+  letter-spacing: 0.2em; /* Espaciado amplio */
+  text-transform: uppercase; /* Mayúsculas */
+  transition: background-color 0.4s var(--ease-out), color 0.4s var(--ease-out), border-color 0.4s; /* Transiciones */
+}
+
+.btn--dark { /* Variante marino */
+  background: var(--navy-900); /* Fondo marino */
+  border-color: var(--navy-900); /* Borde marino */
+  color: var(--ivory); /* Texto marfil */
+}
+
+.btn--dark:hover { /* Hover: se invierte */
+  background: transparent; /* Fondo transparente */
+  color: var(--navy-900); /* Texto marino */
+}
+
+.btn .icon { /* Ícono del botón */
+  transition: transform 0.4s var(--ease-out); /* Animación */
+}
+
+.btn:hover .icon { /* Hover */
+  transform: translateX(4px); /* La flecha avanza */
+}
+
+.link-arrow { /* Enlace con subrayado que se retrae */
+  display: inline-flex; /* Texto + ícono */
+  align-items: center; /* Centrado */
+  gap: 0.6rem; /* Separación */
+  padding-bottom: 0.35rem; /* Espacio para el subrayado */
+  font-size: 0.78rem; /* ~12.5px */
+  font-weight: 500; /* Peso medio */
+  letter-spacing: 0.2em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--accent); /* Acento */
+  background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat; /* Subrayado dibujado con un degradado de 1px: se puede animar */
+  transition: background-size 0.6s var(--ease-out); /* Animación del subrayado */
+}
+
+.link-arrow:hover { /* Hover */
+  background-size: 0% 1px; /* El subrayado se retrae */
+  background-position: right bottom; /* Hacia la derecha */
+}
+
+
+/* =============================================================================
+   6. PANTALLA DE CARGA
+   ============================================================================= */
+.loader { /* Telón de entrada */
+  display: none; /* Oculto si no hay JavaScript (mejora progresiva) */
+}
+
+.js .loader { /* Solo con JavaScript activo */
+  position: fixed; /* Cubre la ventana */
+  inset: 0; /* De borde a borde */
+  z-index: 1000; /* Encima de todo */
+  display: flex; /* Contenido centrado */
+  flex-direction: column; /* En columna */
+  align-items: center; /* Centrado horizontal */
+  justify-content: center; /* Centrado vertical */
+  gap: 1.25rem; /* Separación */
+  background: var(--navy-950); /* Fondo casi negro */
+  color: var(--gold); /* Dorado */
+  transition: transform 0.9s var(--ease-in-out), visibility 0s 0.9s; /* Sube como un telón y luego se oculta */
+  animation: loader-failsafe 0s 4s forwards; /* Seguro: si JS fallara, a los 4 s se oculta solo */
+}
+
+.loader.is-hidden { /* Estado al terminar (JS) */
+  transform: translateY(-100%); /* Se desliza hacia arriba */
+  visibility: hidden; /* Deja de ser interactivo */
+}
+
+.loader__mark { /* Monograma */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 4.5rem; /* 72px */
+  font-style: italic; /* Cursiva */
+  line-height: 1; /* Compacto */
+  animation: rise-in 0.9s var(--ease-out) both; /* Aparece subiendo */
+}
+
+.loader__name { /* Nombre */
+  font-size: 0.7rem; /* ~11px */
+  letter-spacing: 0.42em; /* Muy espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--text-light-muted); /* Gris azulado */
+  animation: rise-in 0.9s 0.15s var(--ease-out) both; /* Aparece con un leve retraso */
+}
+
+.loader__bar { /* Pista de la barra */
+  width: 160px; /* Ancho */
+  height: 1px; /* Grosor */
+  overflow: hidden; /* Recorta el relleno */
+  background: var(--line-light); /* Pista tenue */
+}
+
+.loader__bar-fill { /* Relleno dorado */
+  display: block; /* Bloque */
+  height: 100%; /* Alto completo */
+  background: var(--gold); /* Dorado */
+  transform-origin: left; /* Crece desde la izquierda */
+  animation: grow-x 1.1s var(--ease-in-out) both; /* Se llena */
+}
+
+
+/* =============================================================================
+   7. BARRA SUPERIOR Y MENÚ (móvil / tablet)
+   ============================================================================= */
+.topbar { /* Barra fija */
+  position: fixed; /* Siempre visible */
+  inset: 0 0 auto 0; /* Arriba, a lo ancho */
+  z-index: 120; /* Encima del menú desplegado */
+  display: flex; /* Marca y botón en fila */
+  align-items: center; /* Centrado vertical */
+  justify-content: space-between; /* A los extremos */
+  height: var(--topbar-h); /* Alto fijo */
+  padding-inline: 1.25rem; /* Márgenes laterales */
+  background: rgba(11, 20, 36, 0.9); /* Marino translúcido */
+  backdrop-filter: blur(12px); /* Desenfoca lo que pasa detrás */
+  -webkit-backdrop-filter: blur(12px); /* Prefijo Safari */
+  border-bottom: 1px solid var(--line-light); /* Línea inferior */
+  color: var(--text-light); /* Texto claro */
+}
+
+.topbar__brand { /* Marca */
+  display: flex; /* Monograma + nombre */
+  align-items: center; /* Centrado */
+  gap: 0.75rem; /* Separación */
+}
+
+.topbar__brand .monogram { /* Monograma más pequeño en la barra */
+  width: 38px; /* Ancho */
+  height: 38px; /* Alto */
+  font-size: 1.05rem; /* Texto */
+}
+
+.topbar__name { /* Nombre */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.2rem; /* ~19px */
+  letter-spacing: 0.02em; /* Ligero espaciado */
+}
+
+.topbar__progress { /* Progreso de lectura horizontal */
+  position: absolute; /* Sobre el borde inferior */
+  left: 0; /* Desde la izquierda */
+  right: 0; /* Hasta la derecha */
+  bottom: -1px; /* Sobre la línea inferior */
+  height: 2px; /* Grosor */
+  background: var(--gold); /* Dorado */
+  transform-origin: left; /* Crece desde la izquierda */
+  transform: scaleX(var(--scroll-progress, 0)); /* JS actualiza --scroll-progress de 0 a 1 */
+}
+
+.menu-toggle { /* Botón Menú */
+  display: flex; /* Texto + ícono */
+  align-items: center; /* Centrado */
+  gap: 0.75rem; /* Separación */
+  min-height: 44px; /* Área táctil */
+  font-size: 0.72rem; /* ~11.5px */
+  letter-spacing: 0.26em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+}
+
+.menu-toggle__icon { /* Contenedor de las dos líneas */
+  position: relative; /* Referencia */
+  width: 26px; /* Ancho */
+  height: 10px; /* Alto */
+}
+
+.menu-toggle__icon span { /* Cada línea */
+  position: absolute; /* Libre */
+  left: 0; /* Izquierda */
+  width: 100%; /* Ancho completo */
+  height: 1px; /* Fina */
+  background: var(--gold); /* Dorada */
+  transition: transform 0.45s var(--ease-out), top 0.45s var(--ease-out); /* Animación a "X" */
+}
+
+.menu-toggle__icon span:first-child { top: 0; } /* Línea superior */
+.menu-toggle__icon span:last-child { top: 9px; } /* Línea inferior */
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__icon span:first-child { /* Menú abierto: línea 1 */
+  top: 4.5px; /* Al centro */
+  transform: rotate(45deg); /* Diagonal */
+}
+
+.menu-toggle[aria-expanded="true"] .menu-toggle__icon span:last-child { /* Menú abierto: línea 2 */
+  top: 4.5px; /* Al centro */
+  transform: rotate(-45deg); /* Diagonal opuesta: forma la "X" */
+}
+
+.menu { /* Menú a pantalla completa */
+  position: fixed; /* Cubre la ventana */
+  inset: 0; /* De borde a borde */
+  z-index: 110; /* Bajo la barra superior */
+  display: flex; /* Lista arriba, pie abajo */
+  flex-direction: column; /* En columna */
+  justify-content: space-between; /* Repartidos */
+  padding: calc(var(--topbar-h) + 2.5rem) 1.5rem 2rem; /* Deja espacio para la barra */
+  overflow-y: auto; /* Scroll si la pantalla es muy baja */
+  background: var(--navy-950); /* Fondo */
+  color: var(--text-light); /* Texto claro */
+  clip-path: inset(0 0 100% 0); /* Recortado por completo (cerrado) */
+  visibility: hidden; /* Invisible para teclado y lectores */
+  transition: clip-path 0.8s var(--ease-in-out), visibility 0s 0.8s; /* Telón que se recoge; visibility cambia al final */
+}
+
+.menu.is-open { /* Menú abierto (JS) */
+  clip-path: inset(0 0 0 0); /* Se descubre de arriba hacia abajo */
+  visibility: visible; /* Interactivo */
+  transition: clip-path 0.8s var(--ease-in-out), visibility 0s; /* visibility cambia al inicio */
+}
+
+.menu__list { /* Lista */
+  display: grid; /* Apilada */
+  gap: 0.25rem; /* Separación */
+}
+
+.menu__link { /* Enlace grande */
+  display: flex; /* Numeral + texto */
+  align-items: baseline; /* Alineados por la línea base */
+  gap: 1rem; /* Separación */
+  padding-block: 0.35rem; /* Área táctil */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(2.25rem, 9vw, 3.5rem); /* Grande y fluido */
+  line-height: 1.15; /* Compacto */
+  opacity: 0; /* Oculto antes de abrir */
+  transform: translateY(24px); /* Desplazado */
+  transition: opacity 0.3s, transform 0.3s, color 0.3s; /* Salida rápida al cerrar */
+}
+
+.menu.is-open .menu__link { /* Al abrir */
+  opacity: 1; /* Visible */
+  transform: none; /* En su sitio */
+  transition: opacity 0.7s var(--ease-out) calc(0.3s + var(--i, 0) * 0.07s), transform 0.9s var(--ease-out) calc(0.3s + var(--i, 0) * 0.07s), color 0.3s; /* Entrada escalonada usando --i del HTML */
+}
+
+.menu__link:hover, .menu__link.is-active { /* Hover o sección actual */
+  color: var(--gold); /* Dorado */
+  font-style: italic; /* Cursiva */
+}
+
+.menu__numeral { /* Numeral romano */
+  min-width: 2.5rem; /* Alinea los textos */
+  font-family: var(--font-sans); /* Sans */
+  font-size: 0.75rem; /* 12px */
+  font-style: normal; /* Sin cursiva */
+  letter-spacing: 0.2em; /* Espaciado */
+  color: var(--gold); /* Dorado */
+}
+
+.menu__footer { /* Pie del menú */
+  display: grid; /* Apilado */
+  gap: 0.4rem; /* Separación */
+  margin-top: 2rem; /* Separación con la lista */
+  padding-top: 1.5rem; /* Espacio interior */
+  border-top: 1px solid var(--line-light); /* Línea superior */
+  font-size: 0.875rem; /* 14px */
+  color: var(--text-light-muted); /* Secundario */
+}
+
+.menu__footer a { /* Correo */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.35rem; /* Grande */
+  color: var(--text-light); /* Claro */
+}
+
+
+/* =============================================================================
+   8. RIEL LATERAL (escritorio)
+   ============================================================================= */
+.rail { /* Columna de navegación */
+  display: none; /* Oculta en móvil; se activa en la media query de 1024px */
+  position: fixed; /* Fija */
+  inset: 0 auto 0 0; /* Pegada a la izquierda, de arriba abajo */
+  z-index: 100; /* Sobre el contenido */
+  width: var(--rail-w); /* Ancho */
+  flex-direction: column; /* Elementos apilados */
+  align-items: center; /* Centrados */
+  justify-content: space-between; /* Marca arriba, progreso abajo */
+  padding-block: 1.75rem; /* Relleno vertical */
+  background: var(--navy-950); /* Fondo */
+  border-right: 1px solid var(--line-light); /* Línea derecha */
+  color: var(--text-light); /* Texto claro */
+  --accent: var(--gold); /* Contexto oscuro para el foco */
+}
+
+.rail__list { /* Lista de numerales */
+  display: grid; /* Apilada */
+  gap: 1rem; /* Separación */
+}
+
+.rail__link { /* Enlace numeral */
+  position: relative; /* Referencia para la etiqueta y la marca */
+  display: grid; /* Para centrar */
+  place-items: center; /* Centrado */
+  width: 44px; /* Área táctil */
+  height: 44px; /* Área táctil */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.15rem; /* ~18px */
+  font-style: italic; /* Cursiva */
+  color: var(--text-light-muted); /* Gris azulado */
+  transition: color 0.3s; /* Transición */
+}
+
+.rail__link::before { /* Marca de sección activa */
+  content: ''; /* Pseudo-elemento vacío */
+  position: absolute; /* Libre */
+  left: -22px; /* Desde el borde izquierdo del riel */
+  top: 50%; /* Centro vertical */
+  width: 0; /* Oculta */
+  height: 1px; /* Fina */
+  background: var(--gold); /* Dorada */
+  transition: width 0.4s var(--ease-out); /* Crece */
+}
+
+.rail__link:hover, .rail__link.is-active { /* Hover o activo */
+  color: var(--gold); /* Dorado */
+}
+
+.rail__link.is-active::before { /* Activo */
+  width: 16px; /* Aparece la marca */
+}
+
+.rail__label { /* Etiqueta emergente */
+  position: absolute; /* Fuera del riel */
+  left: calc(100% + 1.25rem); /* A la derecha */
+  top: 50%; /* Centro vertical */
+  padding: 0.45rem 0.85rem; /* Relleno */
+  background: var(--navy-950); /* Fondo */
+  border: 1px solid var(--line-light); /* Borde */
+  font-family: var(--font-sans); /* Sans */
+  font-size: 0.68rem; /* ~11px */
+  font-style: normal; /* Sin cursiva */
+  letter-spacing: 0.22em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  white-space: nowrap; /* En una línea */
+  color: var(--text-light); /* Claro */
+  opacity: 0; /* Oculta */
+  pointer-events: none; /* No interfiere con el cursor */
+  transform: translate(-6px, -50%); /* Ligeramente a la izquierda y centrada */
+  transition: opacity 0.3s, transform 0.4s var(--ease-out); /* Aparición */
+}
+
+.rail__link:hover .rail__label, .rail__link:focus-visible .rail__label { /* Hover o foco */
+  opacity: 1; /* Visible */
+  transform: translate(0, -50%); /* En su sitio */
+}
+
+.rail__progress { /* Progreso vertical */
+  position: relative; /* Referencia */
+  width: 1px; /* Fino */
+  height: 96px; /* Alto */
+  background: var(--line-light); /* Pista */
+}
+
+.rail__progress::after { /* Relleno */
+  content: ''; /* Vacío */
+  position: absolute; /* Sobre la pista */
+  inset: 0; /* Completo */
+  background: var(--gold); /* Dorado */
+  transform-origin: top; /* Crece hacia abajo */
+  transform: scaleY(var(--scroll-progress, 0)); /* Mismo valor que la barra móvil: una sola fuente de verdad */
+}
+
+
+/* =============================================================================
+   9. HERO
+   ============================================================================= */
+.hero { /* Portada */
+  position: relative; /* Referencia */
+  isolation: isolate; /* Contexto de apilamiento propio para el monograma de fondo */
+  display: flex; /* Centrado vertical */
+  align-items: center; /* Centrado */
+  min-height: 100svh; /* Alto visible de pantalla */
+  padding-block: calc(var(--topbar-h) + 3.5rem) 9rem; /* Espacio para barra superior e indicador de scroll */
+  overflow: hidden; /* Recorta el monograma gigante */
+  background: radial-gradient(120% 80% at 80% 10%, var(--navy-700) 0%, var(--navy-900) 55%, var(--navy-950) 100%); /* Luz tenue desde la esquina superior derecha */
+}
+
+.hero__frame { /* Marco dorado */
+  position: absolute; /* Libre */
+  inset: clamp(0.75rem, 2.5vw, 1.75rem); /* Separado de los bordes */
+  border: 1px solid rgba(201, 163, 95, 0.28); /* Línea dorada tenue */
+  pointer-events: none; /* No bloquea clics */
+}
+
+.hero__frame::before, .hero__frame::after { /* Rombos en el centro superior e inferior del marco */
+  content: ''; /* Vacío */
+  position: absolute; /* Libre */
+  left: 50%; /* Centro horizontal */
+  width: 7px; /* Tamaño */
+  height: 7px; /* Tamaño */
+  background: var(--gold); /* Dorado */
+  transform: translateX(-50%) rotate(45deg); /* Centrado y rotado: rombo */
+}
+
+.hero__frame::before { top: -4px; } /* Rombo superior */
+.hero__frame::after { bottom: -4px; } /* Rombo inferior */
+
+.hero__monogram { /* "CH" gigante de fondo */
+  position: absolute; /* Libre */
+  z-index: -1; /* Detrás del contenido */
+  right: -2vw; /* Sobresale a la derecha */
+  bottom: -6vw; /* Sobresale abajo */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(14rem, 42vw, 40rem); /* Enorme y fluido */
+  font-style: italic; /* Cursiva */
+  line-height: 0.8; /* Compacto */
+  color: transparent; /* Sin relleno */
+  -webkit-text-stroke: 1px rgba(201, 163, 95, 0.18); /* Solo contorno dorado tenue */
+  user-select: none; /* No seleccionable */
+}
+
+.hero__overline { /* Antetítulo */
+  display: flex; /* Línea + texto */
+  align-items: center; /* Centrado */
+  gap: 1rem; /* Separación */
+  margin-bottom: 2rem; /* Separación con el título */
+  font-size: 0.72rem; /* ~11.5px */
+  letter-spacing: clamp(0.2em, 0.9vw, 0.32em); /* Espaciado fluido: cabe en una línea en móvil, se abre en escritorio */
+  text-transform: uppercase; /* Mayúsculas */
+  white-space: nowrap; /* Siempre en una sola línea */
+  color: var(--gold); /* Dorado */
+}
+
+.hero__overline::before { /* Línea previa */
+  content: ''; /* Vacío */
+  flex-shrink: 0; /* No se comprime */
+  width: clamp(24px, 6vw, 56px); /* Largo fluido */
+  height: 1px; /* Fina */
+  background: currentColor; /* Mismo color */
+}
+
+.hero__title { /* h1 */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(3rem, 9.5vw, 8.5rem); /* Monumental y fluido */
+  font-weight: 400; /* Ligero: la serif grande gana elegancia */
+  line-height: 0.98; /* Muy compacto */
+  letter-spacing: -0.015em; /* Apretado */
+}
+
+.hero__line { /* Cada línea del título */
+  display: block; /* Una por renglón */
+}
+
+.hero__line--accent { /* Línea de apellidos */
+  padding-left: clamp(0rem, 8vw, 8rem); /* Sangría editorial */
+  font-style: italic; /* Cursiva */
+  color: var(--gold); /* Dorado */
+}
+
+.hero__role { /* Propuesta de valor */
+  max-width: 34rem; /* Ancho de línea cómodo */
+  margin-top: 2.5rem; /* Separación */
+  font-size: clamp(1rem, 1.5vw, 1.2rem); /* Fluido */
+  font-weight: 300; /* Ligero */
+  color: var(--text-light-muted); /* Secundario */
+}
+
+.hero__meta { /* Estado + enlace */
+  display: flex; /* En fila */
+  flex-wrap: wrap; /* Salta de línea si no cabe */
+  align-items: center; /* Centrado */
+  gap: 1.25rem 2.5rem; /* Separación vertical / horizontal */
+  margin-top: 3rem; /* Separación */
+}
+
+.hero__status { /* Disponibilidad */
+  display: inline-flex; /* Punto + texto */
+  align-items: center; /* Centrado */
+  gap: 0.75rem; /* Separación */
+  font-size: 0.9rem; /* ~14.5px */
+}
+
+.hero__status-dot { /* Punto dorado */
+  width: 8px; /* Tamaño */
+  height: 8px; /* Tamaño */
+  border-radius: 50%; /* Círculo */
+  background: var(--gold); /* Dorado */
+  animation: glow 2.4s ease-out infinite; /* Halo pulsante */
+}
+
+.hero__scroll { /* Indicador de scroll */
+  position: absolute; /* Libre */
+  left: 0; /* Junto con right:0 y margin auto… */
+  right: 0; /* …centra el elemento sin usar transform (que reservamos para la animación de entrada) */
+  bottom: 2.75rem; /* Desde abajo */
+  display: flex; /* Texto + línea */
+  flex-direction: column; /* En columna */
+  align-items: center; /* Centrados */
+  gap: 0.75rem; /* Separación */
+  width: max-content; /* Ancho del contenido */
+  margin-inline: auto; /* Centrado */
+  font-size: 0.68rem; /* ~11px */
+  letter-spacing: 0.3em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--text-light-muted); /* Secundario */
+}
+
+.hero__scroll-line { /* Línea */
+  position: relative; /* Referencia */
+  width: 1px; /* Fina */
+  height: 56px; /* Alto */
+  overflow: hidden; /* Recorta el destello */
+  background: var(--line-light); /* Pista */
+}
+
+.hero__scroll-line::after { /* Destello */
+  content: ''; /* Vacío */
+  position: absolute; /* Sobre la pista */
+  inset: 0; /* Completo */
+  background: var(--gold); /* Dorado */
+  animation: scroll-hint 2.2s var(--ease-in-out) infinite; /* Baja en bucle */
+}
+
+/* --- Animación de entrada del título (clases puestas por JS) --- */
+.word { /* Envoltura de cada palabra */
+  display: inline-block; /* Permite recortar */
+  overflow: hidden; /* Esconde la palabra mientras está desplazada */
+  padding: 0 0.05em 0.1em; /* Evita recortar la inclinación de la cursiva y los descendentes */
+  margin: 0 -0.05em -0.1em; /* Compensa el padding para no alterar el espaciado */
+  vertical-align: bottom; /* Alineación estable */
+}
+
+.word__inner { /* Palabra en sí */
+  display: inline-block; /* Transformable */
+}
+
+.hero-ready .word__inner { /* Cuando JS dividió el título */
+  transform: translateY(110%); /* Escondida debajo */
+  transition: transform 1.1s var(--ease-out); /* Subida suave */
+  transition-delay: calc(var(--i, 0) * 80ms + 150ms); /* Cada palabra un poco después (--i lo asigna JS) */
+}
+
+.is-loaded .hero-ready .word__inner { /* Tras la pantalla de carga */
+  transform: none; /* Sube a su lugar */
+}
+
+.hero-ready [data-hero-fade] { /* Resto de elementos del hero */
+  opacity: 0; /* Ocultos */
+  transform: translateY(16px); /* Desplazados */
+  transition: opacity 0.9s var(--ease-out) 0.7s, transform 0.9s var(--ease-out) 0.7s; /* Aparecen después del título */
+}
+
+.is-loaded .hero-ready [data-hero-fade] { /* Tras la carga */
+  opacity: 1; /* Visibles */
+  transform: none; /* En su sitio */
+}
+
+
+/* =============================================================================
+   10. FILOSOFÍA
+   ============================================================================= */
+.philosophy__grid { /* Rejilla retrato + texto */
+  display: grid; /* CSS Grid */
+  gap: 4rem; /* Separación */
+  align-items: start; /* Alineados arriba */
+}
+
+.portrait { /* Figura del retrato */
+  position: relative; /* Referencia del marco desplazado */
+  width: 100%; /* Ancho completo */
+  max-width: 440px; /* Límite */
+  margin-inline: auto; /* Centrado */
+}
+
+.portrait::before { /* Marco dorado desplazado detrás de la foto */
+  content: ''; /* Vacío */
+  position: absolute; /* Libre */
+  inset: 1.25rem -1.25rem 3.25rem 1.25rem; /* Desplazado abajo-derecha (deja fuera el pie de foto) */
+  border: 1px solid var(--gold-ink); /* Línea dorada */
+}
+
+.portrait__frame { /* Marco de la foto */
+  position: relative; /* Sobre el marco desplazado */
+  display: grid; /* Para centrar */
+  place-items: center; /* Centrado */
+  aspect-ratio: 4 / 5; /* Retrato */
+  overflow: hidden; /* Recorta la imagen */
+  background: linear-gradient(160deg, var(--navy-700), var(--navy-950)); /* Fondo mientras no hay foto */
+}
+
+.portrait__frame img { /* Foto real */
+  width: 100%; /* Ancho */
+  height: 100%; /* Alto */
+  object-fit: cover; /* Recorte sin deformar */
+}
+
+.portrait__placeholder { /* Monograma temporal */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(6rem, 16vw, 9rem); /* Grande */
+  font-style: italic; /* Cursiva */
+  color: transparent; /* Sin relleno */
+  -webkit-text-stroke: 1px var(--gold); /* Contorno dorado */
+}
+
+.portrait__caption { /* Pie de foto */
+  position: relative; /* Sobre el marco */
+  margin-top: 2rem; /* Separación */
+  font-size: 0.72rem; /* ~11.5px */
+  letter-spacing: 0.24em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--muted); /* Secundario */
+}
+
+.philosophy__statement { /* Declaración */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(2rem, 4.2vw, 3.25rem); /* Fluido */
+  font-weight: 400; /* Ligero */
+  line-height: 1.15; /* Compacto */
+}
+
+.philosophy__text { /* Párrafos */
+  display: grid; /* Apilados */
+  gap: 1.25rem; /* Separación */
+  max-width: 38rem; /* Ancho de lectura */
+  margin-top: 2rem; /* Separación */
+  color: var(--muted); /* Secundario */
+}
+
+.philosophy__text p:first-child::first-letter { /* Letra capitular */
+  float: left; /* El texto la rodea */
+  margin: 0.08em 0.12em 0 0; /* Ajuste óptico */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 4.3em; /* Muy grande */
+  line-height: 0.8; /* Compacta */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+.philosophy__signature { /* Firma */
+  margin-top: 2rem; /* Separación */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.85rem; /* Grande */
+  font-style: italic; /* Cursiva */
+}
+
+.facts { /* Datos */
+  display: grid; /* Rejilla */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); /* Columnas automáticas */
+  gap: 0 2rem; /* Separación horizontal */
+  margin-top: 3rem; /* Separación */
+}
+
+.facts__item { /* Cada dato */
+  padding-block: 1.1rem; /* Relleno */
+  border-top: 1px solid var(--line); /* Línea superior */
+}
+
+.facts dt { /* Nombre del dato */
+  font-size: 0.68rem; /* ~11px */
+  letter-spacing: 0.24em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--muted); /* Secundario */
+}
+
+.facts dd { /* Valor */
+  margin-top: 0.3rem; /* Separación */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.3rem; /* ~21px */
+  line-height: 1.3; /* Interlineado */
+}
+
+
+/* =============================================================================
+   11. TRABAJOS Y VISTA PREVIA
+   ============================================================================= */
+.works__head { /* Encabezado */
+  display: grid; /* Rejilla */
+  gap: 1.25rem; /* Separación */
+  margin-bottom: 3.5rem; /* Separación con la lista */
+}
+
+.works__head .section-head { /* Encabezado de sección dentro */
+  margin-bottom: 0.5rem; /* Menos espacio */
+}
+
+.works__count { /* Contador (06) */
+  font-family: var(--font-sans); /* Sans */
+  font-size: 0.28em; /* Pequeño respecto al título */
+  font-style: normal; /* Sin cursiva */
+  letter-spacing: 0.12em; /* Espaciado */
+  color: var(--accent); /* Dorado */
+}
+
+.works__intro { /* Bajada */
+  max-width: 32rem; /* Ancho de lectura */
+  color: var(--muted); /* Secundario */
+}
+
+.works__list { /* Lista */
+  border-top: 1px solid var(--line); /* Línea superior */
+}
+
+.work { /* Cada proyecto */
+  border-bottom: 1px solid var(--line); /* Línea inferior */
+}
+
+.work__row { /* Fila clicable (móvil) */
+  display: grid; /* CSS Grid */
+  grid-template-columns: 2.5rem 1fr auto; /* Número · contenido · flecha */
+  grid-template-areas: "index title arrow" "index meta arrow"; /* Título arriba, disciplina y año abajo */
+  align-items: center; /* Centrado vertical */
+  column-gap: 1rem; /* Separación horizontal */
+  row-gap: 0.35rem; /* Separación vertical */
+  width: 100%; /* Ancho completo */
+  padding-block: 1.75rem; /* Relleno vertical */
+  text-align: left; /* Texto a la izquierda (los botones lo centran por defecto) */
+}
+
+.work__index { /* Número */
+  grid-area: index; /* Columna del número */
+  align-self: start; /* Arriba */
+  padding-top: 0.6rem; /* Ajuste óptico con el título */
+  font-size: 0.75rem; /* 12px */
+  letter-spacing: 0.2em; /* Espaciado */
+  color: var(--accent); /* Dorado */
+}
+
+.work__title { /* Nombre */
+  grid-area: title; /* Área del título */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(1.75rem, 4.5vw, 3.25rem); /* Fluido */
+  line-height: 1.1; /* Compacto */
+  transition: color 0.4s, transform 0.6s var(--ease-out); /* Animación hover */
+}
+
+.work__type { /* Disciplina */
+  grid-area: meta; /* Comparte celda con el año */
+  justify-self: start; /* A la izquierda */
+  font-size: 0.78rem; /* ~12.5px */
+  letter-spacing: 0.14em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--muted); /* Secundario */
+}
+
+.work__year { /* Año */
+  grid-area: meta; /* Misma celda */
+  justify-self: end; /* A la derecha */
+  font-size: 0.85rem; /* ~13.5px */
+  font-variant-numeric: tabular-nums; /* Dígitos de igual ancho */
+  color: var(--muted); /* Secundario */
+}
+
+.work__arrow { /* Flecha en círculo */
+  grid-area: arrow; /* Área de la flecha */
+  display: grid; /* Para centrar */
+  place-items: center; /* Centrado */
+  width: 46px; /* Tamaño */
+  height: 46px; /* Tamaño */
+  border: 1px solid var(--line); /* Borde fino */
+  border-radius: 50%; /* Círculo (única curva del sistema: contraste con lo recto) */
+  color: var(--accent); /* Dorado */
+  transition: background-color 0.4s, color 0.4s, border-color 0.4s, transform 0.6s var(--ease-out); /* Animación */
+}
+
+.work__row:hover .work__title, .work__row:focus-visible .work__title { /* Hover o foco */
+  color: var(--accent); /* Dorado */
+  font-style: italic; /* Cursiva */
+  transform: translateX(0.75rem); /* Se desplaza */
+}
+
+.work__row:hover .work__arrow, .work__row:focus-visible .work__arrow { /* Hover o foco */
+  background: var(--gold); /* Fondo dorado */
+  border-color: var(--gold); /* Borde dorado */
+  color: var(--navy-950); /* Flecha marina */
+  transform: rotate(45deg); /* La flecha apunta a la derecha */
+}
+
+.works__preview { /* Vista previa flotante */
+  position: fixed; /* Relativa a la ventana */
+  top: 0; /* Origen arriba */
+  left: 0; /* Origen izquierda */
+  z-index: 90; /* Sobre el contenido */
+  width: clamp(220px, 22vw, 320px); /* Tamaño fluido */
+  aspect-ratio: 4 / 5; /* Proporción */
+  pointer-events: none; /* No interfiere con el cursor */
+}
+
+.works__preview-inner { /* Tarjeta */
+  position: relative; /* Referencia del marco interior */
+  display: grid; /* Para centrar */
+  place-items: center; /* Centrado */
+  width: 100%; /* Ancho */
+  height: 100%; /* Alto */
+  overflow: hidden; /* Recorte */
+  background: linear-gradient(150deg, var(--tone-1, var(--navy-700)), var(--tone-2, var(--gold))); /* Colores del proyecto (JS copia --tone-1/--tone-2) */
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45); /* Sombra profunda */
+  opacity: 0; /* Oculta */
+  transform: scale(0.85) rotate(-3deg); /* Pequeña e inclinada */
+  transition: opacity 0.4s var(--ease-out), transform 0.7s var(--ease-out); /* Aparición */
+}
+
+.works__preview.is-visible .works__preview-inner { /* Visible (JS) */
+  opacity: 1; /* Visible */
+  transform: none; /* Tamaño y ángulo normales */
+}
+
+.works__preview-inner::after { /* Marco interior fino */
+  content: ''; /* Vacío */
+  position: absolute; /* Libre */
+  inset: 12px; /* Separado del borde */
+  border: 1px solid rgba(245, 240, 230, 0.35); /* Línea marfil translúcida */
+}
+
+.works__preview-initials { /* Iniciales */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 5rem; /* Grande */
+  font-style: italic; /* Cursiva */
+  color: rgba(245, 240, 230, 0.92); /* Marfil */
+}
+
+
+/* =============================================================================
+   12. PANEL DE CASO DE ESTUDIO (<dialog>)
+   ============================================================================= */
+.drawer { /* Panel lateral */
+  width: min(100%, 680px); /* Ancho máximo */
+  max-width: 100%; /* Anula el límite por defecto del navegador */
+  height: 100dvh; /* Alto completo de la ventana */
+  max-height: 100dvh; /* Anula el límite por defecto */
+  margin: 0 0 0 auto; /* Pegado a la derecha */
+  padding: 0; /* Sin relleno */
+  overflow-y: auto; /* Scroll interno */
+  overscroll-behavior: contain; /* El scroll no se "escapa" a la página */
+  border: none; /* Sin borde nativo */
+  border-left: 1px solid rgba(201, 163, 95, 0.35); /* Filo dorado */
+  background: var(--ivory); /* Fondo marfil */
+  color: var(--ink); /* Texto marino */
+  --accent: var(--gold-ink); /* Tema claro */
+  --muted: var(--ink-muted); /* Tema claro */
+  --line: var(--line-dark); /* Tema claro */
+}
+
+.drawer[open] { /* Al abrir */
+  animation: drawer-in 0.8s var(--ease-out); /* Entra desde la derecha */
+}
+
+.drawer.is-closing { /* Al cerrar (JS) */
+  animation: drawer-out 0.45s var(--ease-in-out) forwards; /* Sale hacia la derecha */
+}
+
+.drawer::backdrop { /* Fondo detrás del panel */
+  background: rgba(7, 14, 26, 0.72); /* Marino translúcido */
+  backdrop-filter: blur(4px); /* Desenfoque */
+  -webkit-backdrop-filter: blur(4px); /* Prefijo Safari */
+  animation: fade-in 0.5s ease both; /* Aparece */
+}
+
+.drawer.is-closing::backdrop { /* Al cerrar */
+  animation: fade-out 0.45s ease forwards; /* Se desvanece */
+}
+
+.drawer__header { /* Cabecera */
+  position: sticky; /* Se queda arriba al hacer scroll */
+  top: 0; /* Pegada arriba */
+  z-index: 2; /* Sobre el contenido */
+  display: flex; /* En fila */
+  align-items: center; /* Centrado */
+  justify-content: space-between; /* A los extremos */
+  padding: 0.75rem 1.5rem; /* Relleno */
+  background: rgba(245, 240, 230, 0.94); /* Marfil casi opaco */
+  backdrop-filter: blur(8px); /* Desenfoque */
+  -webkit-backdrop-filter: blur(8px); /* Prefijo Safari */
+  border-bottom: 1px solid var(--line); /* Línea inferior */
+}
+
+.drawer__counter { /* Contador 01 / 06 */
+  font-size: 0.75rem; /* 12px */
+  letter-spacing: 0.24em; /* Espaciado */
+  font-variant-numeric: tabular-nums; /* Dígitos uniformes */
+  color: var(--muted); /* Secundario */
+}
+
+.drawer__close { /* Botón cerrar */
+  display: inline-flex; /* Texto + ícono */
+  align-items: center; /* Centrado */
+  gap: 0.6rem; /* Separación */
+  min-height: 44px; /* Área táctil */
+  font-size: 0.72rem; /* ~11.5px */
+  letter-spacing: 0.24em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+}
+
+.drawer__close .icon { /* Ícono "×" */
+  transition: transform 0.4s var(--ease-out); /* Animación */
+}
+
+.drawer__close:hover .icon { /* Hover */
+  transform: rotate(90deg); /* Gira */
+}
+
+.drawer__cover { /* Portada */
+  position: relative; /* Referencia */
+  display: grid; /* Para centrar */
+  place-items: center; /* Centrado */
+  aspect-ratio: 16 / 10; /* Proporción */
+  overflow: hidden; /* Recorte */
+  background: linear-gradient(150deg, var(--tone-1, var(--navy-700)), var(--tone-2, var(--gold))); /* Colores del proyecto */
+}
+
+.drawer__cover::after { /* Marco interior */
+  content: ''; /* Vacío */
+  position: absolute; /* Libre */
+  inset: 18px; /* Separado */
+  border: 1px solid rgba(245, 240, 230, 0.35); /* Línea marfil */
+}
+
+.drawer__initials { /* Iniciales */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(5rem, 16vw, 8rem); /* Grande */
+  font-style: italic; /* Cursiva */
+  color: rgba(245, 240, 230, 0.92); /* Marfil */
+}
+
+.drawer__body { /* Cuerpo */
+  padding: clamp(1.75rem, 5vw, 3rem); /* Relleno fluido */
+}
+
+.drawer__type { /* Disciplina · año */
+  font-size: 0.75rem; /* 12px */
+  letter-spacing: 0.24em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+.drawer__title { /* Título */
+  margin-top: 0.5rem; /* Separación */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(2.25rem, 6vw, 3.5rem); /* Fluido */
+  line-height: 1.05; /* Compacto */
+}
+
+.drawer__content { /* Contenido clonado */
+  margin-top: 1.5rem; /* Separación */
+}
+
+.case__lead { /* Entradilla */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.5rem; /* 24px */
+  font-style: italic; /* Cursiva */
+  line-height: 1.35; /* Interlineado */
+}
+
+.case__meta { /* Ficha técnica */
+  display: grid; /* Rejilla */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Columnas automáticas */
+  gap: 1rem 1.5rem; /* Separación */
+  margin-block: 2rem; /* Margen vertical */
+  padding-block: 1.25rem; /* Relleno vertical */
+  border-block: 1px solid var(--line); /* Líneas arriba y abajo */
+}
+
+.case__meta dt { /* Nombre del dato */
+  font-size: 0.68rem; /* ~11px */
+  letter-spacing: 0.22em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--muted); /* Secundario */
+}
+
+.case__meta dd { /* Valor */
+  margin-top: 0.25rem; /* Separación */
+  font-size: 0.95rem; /* ~15px */
+  line-height: 1.5; /* Interlineado */
+}
+
+.case__heading { /* Subtítulo */
+  margin-top: 1.75rem; /* Separación */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.6rem; /* ~26px */
+}
+
+.case__text { /* Párrafo */
+  margin-top: 0.5rem; /* Separación */
+  color: var(--muted); /* Secundario */
+}
+
+.drawer__nav { /* Navegación anterior/siguiente */
+  display: flex; /* En fila */
+  justify-content: space-between; /* A los extremos */
+  gap: 1rem; /* Separación */
+  padding: 1.5rem clamp(1.75rem, 5vw, 3rem) 2.5rem; /* Relleno */
+  border-top: 1px solid var(--line); /* Línea superior */
+}
+
+.drawer__nav-btn { /* Botones de navegación */
+  display: inline-flex; /* Texto + ícono */
+  align-items: center; /* Centrado */
+  gap: 0.6rem; /* Separación */
+  min-height: 44px; /* Área táctil */
+  font-size: 0.72rem; /* ~11.5px */
+  letter-spacing: 0.22em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  transition: color 0.3s; /* Transición */
+}
+
+.drawer__nav-btn:hover { /* Hover */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+
+/* =============================================================================
+   13. SERVICIOS (acordeón nativo)
+   ============================================================================= */
+.services__grid { /* Rejilla */
+  display: grid; /* CSS Grid */
+  gap: 3.5rem; /* Separación */
+}
+
+.services__text { /* Bajada */
+  max-width: 26rem; /* Ancho de lectura */
+  margin-block: 1.5rem 2.5rem; /* Márgenes */
+  color: var(--muted); /* Secundario */
+}
+
+.services__list { /* Acordeón */
+  border-top: 1px solid var(--line); /* Línea superior */
+}
+
+.service { /* Cada <details> */
+  border-bottom: 1px solid var(--line); /* Línea inferior */
+}
+
+.service__summary { /* <summary> */
+  display: grid; /* Rejilla */
+  grid-template-columns: 2.5rem 1fr auto; /* Número · título · ícono */
+  align-items: center; /* Centrado */
+  gap: 1rem; /* Separación */
+  padding-block: 1.6rem; /* Relleno vertical */
+  cursor: pointer; /* Mano */
+  list-style: none; /* Quita el triángulo nativo (Firefox/Chrome) */
+}
+
+.service__summary::-webkit-details-marker { /* Triángulo nativo en Safari */
+  display: none; /* Oculto */
+}
+
+.service__index { /* Número */
+  font-size: 0.75rem; /* 12px */
+  letter-spacing: 0.2em; /* Espaciado */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+.service__title { /* Nombre */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(1.5rem, 3.2vw, 2.25rem); /* Fluido */
+  line-height: 1.15; /* Compacto */
+  transition: color 0.3s; /* Transición */
+}
+
+.service__summary:hover .service__title, .service[open] .service__title { /* Hover o abierto */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+.service__icon { /* Contenedor del "+" */
+  position: relative; /* Referencia */
+  width: 18px; /* Ancho */
+  height: 18px; /* Alto */
+}
+
+.service__icon::before, .service__icon::after { /* Las dos barras del "+" */
+  content: ''; /* Vacío */
+  position: absolute; /* Libres */
+  top: 50%; /* Centro */
+  left: 0; /* Izquierda */
+  width: 100%; /* Ancho completo */
+  height: 1px; /* Finas */
+  background: currentColor; /* Color del texto */
+  transition: transform 0.45s var(--ease-out); /* Animación */
+}
+
+.service__icon::after { /* Barra vertical */
+  transform: rotate(90deg); /* Girada 90° */
+}
+
+.service[open] .service__icon::after { /* Abierto */
+  transform: rotate(0deg); /* Se acuesta: el "+" se vuelve "−" */
+}
+
+.service::details-content { /* Contenido desplegable (CSS moderno) */
+  block-size: 0; /* Altura 0 cuando está cerrado */
+  overflow: clip; /* Recorta el contenido */
+  transition: block-size 0.6s var(--ease-out), content-visibility 0.6s allow-discrete; /* Anima la altura; allow-discrete permite animar la visibilidad del contenido */
+}
+
+.service[open]::details-content { /* Abierto */
+  block-size: auto; /* Altura natural (animable gracias a interpolate-size) */
+}
+
+.service__content { /* Interior */
+  padding: 0 0 2rem 3.5rem; /* Sangría alineada con el título */
+}
+
+.service__content p { /* Descripción */
+  max-width: 34rem; /* Ancho de lectura */
+  color: var(--muted); /* Secundario */
+}
+
+.service__deliverables { /* Entregables */
+  display: grid; /* Rejilla */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Columnas automáticas */
+  gap: 0.4rem 1.5rem; /* Separación */
+  margin-top: 1.25rem; /* Separación */
+}
+
+.service__deliverables li { /* Cada entregable */
+  display: flex; /* Guion + texto */
+  gap: 0.6rem; /* Separación */
+  font-size: 0.95rem; /* ~15px */
+}
+
+.service__deliverables li::before { /* Guion largo como viñeta */
+  content: '—'; /* Raya */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+
+/* =============================================================================
+   14. TRAYECTORIA (línea de tiempo)
+   ============================================================================= */
+.journey { /* Sección */
+  background: var(--navy-800); /* Marino un tono más claro para alternar */
+}
+
+.journey__grid { /* Rejilla */
+  display: grid; /* CSS Grid */
+  gap: 3.5rem; /* Separación */
+}
+
+.journey__text { /* Bajada */
+  max-width: 26rem; /* Ancho de lectura */
+  margin-block: 1.5rem 2rem; /* Márgenes */
+  color: var(--muted); /* Secundario */
+}
+
+.timeline { /* Lista */
+  position: relative; /* Referencia de las líneas */
+  display: grid; /* Apilada */
+  gap: 3rem; /* Separación */
+  padding-left: 2.5rem; /* Espacio para la línea y los rombos */
+}
+
+.timeline::before, .timeline::after { /* Pista y relleno de la línea */
+  content: ''; /* Vacío */
+  position: absolute; /* Libres */
+  top: 0.5rem; /* Desde el primer rombo */
+  bottom: 0.5rem; /* Hasta el final */
+  left: 7px; /* Alineada con el centro de los rombos */
+  width: 1px; /* Fina */
+}
+
+.timeline::before { /* Pista */
+  background: var(--line); /* Tenue */
+}
+
+.timeline::after { /* Relleno */
+  background: var(--gold); /* Dorado */
+  transform-origin: top; /* Crece hacia abajo */
+  transform: scaleY(var(--timeline-progress, 0)); /* JS actualiza --timeline-progress según el scroll */
+}
+
+.timeline__item { /* Hito */
+  position: relative; /* Referencia del rombo */
+}
+
+.timeline__item::before { /* Rombo */
+  content: ''; /* Vacío */
+  position: absolute; /* Libre */
+  z-index: 1; /* Sobre la línea */
+  top: 0.45rem; /* Alineado con la fecha */
+  left: calc(-2.5rem + 3px); /* Sobre la línea (compensa el padding de la lista) */
+  width: 9px; /* Tamaño */
+  height: 9px; /* Tamaño */
+  border: 1px solid var(--gold); /* Contorno dorado */
+  background: var(--navy-800); /* Relleno del color de fondo (hueco) */
+  transform: rotate(45deg); /* Rombo */
+  transition: background-color 0.4s; /* Transición */
+}
+
+.timeline__item.is-active::before { /* Hito alcanzado (JS) */
+  background: var(--gold); /* Se rellena */
+}
+
+.timeline__date { /* Periodo */
+  font-size: 0.75rem; /* 12px */
+  letter-spacing: 0.22em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--accent); /* Dorado */
+}
+
+.timeline__role { /* Cargo */
+  margin-top: 0.5rem; /* Separación */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(1.5rem, 3vw, 2rem); /* Fluido */
+  line-height: 1.15; /* Compacto */
+}
+
+.timeline__place { /* Lugar */
+  margin-top: 0.2rem; /* Separación */
+  font-family: var(--font-serif); /* Serif */
+  font-size: 1.15rem; /* ~18px */
+  font-style: italic; /* Cursiva */
+  color: var(--text-light); /* Claro */
+}
+
+.timeline__text { /* Descripción */
+  max-width: 34rem; /* Ancho de lectura */
+  margin-top: 0.75rem; /* Separación */
+  color: var(--muted); /* Secundario */
+}
+
+
+/* =============================================================================
+   15. CONTACTO Y FORMULARIO
+   ============================================================================= */
+.contact__grid { /* Rejilla */
+  display: grid; /* CSS Grid */
+  gap: 4rem; /* Separación */
+}
+
+.contact__text { /* Bajada */
+  max-width: 28rem; /* Ancho de lectura */
+  margin-top: 1.5rem; /* Separación */
+  color: var(--muted); /* Secundario */
+}
+
+.contact__email { /* Bloque de correo */
+  display: grid; /* Apilado */
+  justify-items: start; /* A la izquierda */
+  gap: 0.4rem; /* Separación */
+  margin-top: 2.5rem; /* Separación */
+  padding-top: 2rem; /* Relleno */
+  border-top: 1px solid var(--line); /* Línea superior */
+}
+
+.contact__label { /* Etiqueta */
+  font-size: 0.68rem; /* ~11px */
+  letter-spacing: 0.24em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--muted); /* Secundario */
+}
+
+.contact__email-link { /* Correo grande */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(1.6rem, 4vw, 2.4rem); /* Fluido */
+  line-height: 1.2; /* Interlineado */
+  overflow-wrap: anywhere; /* Corta correos largos */
+  background: linear-gradient(var(--accent), var(--accent)) left bottom / 0% 1px no-repeat; /* Subrayado oculto */
+  transition: background-size 0.6s var(--ease-out); /* Animación */
+}
+
+.contact__email-link:hover { /* Hover */
+  background-size: 100% 1px; /* Subrayado completo */
+}
+
+.contact__copy { /* Botón copiar */
+  display: inline-flex; /* Ícono + texto */
+  align-items: center; /* Centrado */
+  gap: 0.5rem; /* Separación */
+  min-height: 44px; /* Área táctil */
+  font-size: 0.72rem; /* ~11.5px */
+  letter-spacing: 0.2em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+.social { /* Redes */
+  display: flex; /* En fila */
+  flex-wrap: wrap; /* Saltan de línea */
+  gap: 0.75rem 2rem; /* Separación */
+  margin-top: 2.5rem; /* Separación */
+}
+
+.social a { /* Enlace */
+  display: inline-flex; /* Texto + flecha */
+  align-items: center; /* Centrado */
+  gap: 0.35rem; /* Separación */
+  font-size: 0.78rem; /* ~12.5px */
+  font-weight: 500; /* Peso medio */
+  letter-spacing: 0.18em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  transition: color 0.3s; /* Transición */
+}
+
+.social a:hover { /* Hover */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+.contact-form { /* Formulario */
+  position: relative; /* Referencia del campo trampa */
+  display: grid; /* Campos apilados */
+  gap: 1.75rem; /* Separación */
+  padding: clamp(1.75rem, 4vw, 3rem); /* Relleno fluido */
+  background: var(--ivory-dark); /* Superficie marfil profunda */
+  border: 1px solid var(--line); /* Borde fino */
+}
+
+.contact-form__row { /* Fila */
+  display: grid; /* 1 columna en móvil */
+  gap: 1.75rem; /* Separación */
+}
+
+.field { /* Campo con etiqueta flotante */
+  position: relative; /* Referencia de la etiqueta */
+}
+
+.field__input { /* Input y textarea */
+  width: 100%; /* Ancho completo */
+  padding: 1.5rem 0 0.6rem; /* Espacio arriba para la etiqueta */
+  border: 0; /* Sin bordes… */
+  border-bottom: 1px solid rgba(20, 32, 58, 0.4); /* …salvo la línea inferior */
+  border-radius: 0; /* iOS redondea por defecto */
+  background: transparent; /* Sin fondo */
+  font-size: 1rem; /* 16px: evita el zoom automático de iOS */
+  transition: border-color 0.3s, box-shadow 0.3s; /* Transición */
+}
+
+.field__input:focus { /* Enfocado */
+  outline: none; /* Se reemplaza por la línea inferior engrosada */
+  border-bottom-color: var(--accent); /* Línea dorada */
+  box-shadow: 0 1px 0 0 var(--accent); /* Engrosa la línea a 2px: indicador de foco visible */
+}
+
+.field__label { /* Etiqueta */
+  position: absolute; /* Sobre el campo */
+  top: 1.4rem; /* Dentro del campo (como placeholder) */
+  left: 0; /* Izquierda */
+  color: var(--muted); /* Secundario */
+  pointer-events: none; /* Los clics pasan al input */
+  transform-origin: left top; /* Escala desde la esquina */
+  transition: transform 0.35s var(--ease-out), color 0.3s; /* Animación */
+}
+
+.field__input:focus + .field__label, .field__input:not(:placeholder-shown) + .field__label { /* Enfocado o con texto */
+  transform: translateY(-1.3rem) scale(0.78); /* Sube y se reduce */
+  color: var(--accent); /* Dorado oscuro */
+}
+
+.field__input[aria-invalid="true"] { /* Inválido (JS) */
+  border-bottom-color: var(--error); /* Línea roja */
+}
+
+.field__input[aria-invalid="true"] + .field__label { /* Etiqueta de campo inválido */
+  color: var(--error); /* Roja */
+}
+
+textarea.field__input { /* Área de texto */
+  min-height: 150px; /* Altura mínima */
+  resize: vertical; /* Solo vertical */
+  line-height: 1.6; /* Interlineado */
+}
+
+.field__error { /* Mensaje de error */
+  min-height: 1.3em; /* Espacio reservado: no hay saltos */
+  margin-top: 0.4rem; /* Separación */
+  font-size: 0.82rem; /* ~13px */
+  color: var(--error); /* Rojo */
+}
+
+.budget__legend { /* Título del grupo */
+  margin-bottom: 0.9rem; /* Separación */
+  font-size: 0.68rem; /* ~11px */
+  letter-spacing: 0.24em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--muted); /* Secundario */
+}
+
+.budget__options { /* Opciones */
+  display: flex; /* En fila */
+  flex-wrap: wrap; /* Saltan de línea */
+  gap: 0.6rem; /* Separación */
+}
+
+.budget__option { /* Cada opción */
+  position: relative; /* Referencia del radio oculto */
+}
+
+.budget__option input { /* Radio nativo */
+  position: absolute; /* Fuera del flujo */
+  width: 1px; /* Mínimo… */
+  height: 1px; /* …pero sigue enfocable y accesible */
+  opacity: 0; /* Invisible */
+}
+
+.budget__option span { /* Píldora visible */
+  display: inline-flex; /* Centrado */
+  align-items: center; /* Centrado vertical */
+  min-height: 44px; /* Área táctil */
+  padding: 0 1.1rem; /* Relleno */
+  border: 1px solid rgba(20, 32, 58, 0.3); /* Borde */
+  font-size: 0.875rem; /* 14px */
+  cursor: pointer; /* Mano */
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Transición */
+}
+
+.budget__option span:hover { /* Hover */
+  border-color: var(--accent); /* Borde dorado */
+}
+
+.budget__option input:checked + span { /* Seleccionada */
+  background: var(--navy-900); /* Fondo marino */
+  border-color: var(--navy-900); /* Borde marino */
+  color: var(--ivory); /* Texto marfil */
+}
+
+.budget__option input:focus-visible + span { /* Foco con teclado */
+  outline: 2px solid var(--accent); /* Anillo */
+  outline-offset: 3px; /* Separación */
+}
+
+.contact-form__honeypot { /* Campo trampa */
+  position: absolute; /* Fuera del flujo */
+  left: -9999px; /* Fuera de pantalla */
+}
+
+.contact-form__submit { /* Botón enviar */
+  justify-self: start; /* Ancho natural, a la izquierda */
+}
+
+.contact-form__submit:disabled { /* Enviando */
+  opacity: 0.6; /* Atenuado */
+  cursor: wait; /* Cursor de espera */
+}
+
+
+/* =============================================================================
+   16. PIE DE PÁGINA Y NOTIFICACIÓN
+   ============================================================================= */
+.footer { /* Pie */
+  padding-block: 5rem 2rem; /* Relleno */
+  overflow: hidden; /* Recorta el nombre monumental */
+  background: var(--navy-950); /* Fondo */
+  color: var(--text-light); /* Texto */
+  --accent: var(--gold); /* Tema oscuro */
+}
+
+.footer__name { /* Nombre monumental */
+  font-family: var(--font-serif); /* Serif */
+  font-size: clamp(3.25rem, 13vw, 11rem); /* Enorme y fluido */
+  line-height: 0.92; /* Compacto */
+  letter-spacing: -0.02em; /* Apretado */
+}
+
+.footer__name em { /* Apellido */
+  color: var(--gold); /* Dorado */
+}
+
+.footer__bottom { /* Fila inferior */
+  display: flex; /* Flexbox */
+  flex-direction: column; /* Apilado en móvil */
+  gap: 1rem; /* Separación */
+  margin-top: 3rem; /* Separación */
+  padding-top: 1.5rem; /* Relleno */
+  border-top: 1px solid var(--line-light); /* Línea superior */
+  font-size: 0.82rem; /* ~13px */
+  color: var(--text-light-muted); /* Secundario */
+}
+
+.footer__top { /* Volver arriba */
+  font-size: 0.72rem; /* ~11.5px */
+  letter-spacing: 0.22em; /* Espaciado */
+  text-transform: uppercase; /* Mayúsculas */
+  color: var(--gold); /* Dorado */
+}
+
+.toast { /* Notificación */
+  position: fixed; /* Sobre la página */
+  left: 50%; /* Centro horizontal */
+  bottom: 1.5rem; /* Desde abajo */
+  z-index: 300; /* Encima del contenido */
+  max-width: calc(100% - 2rem); /* No toca los bordes */
+  padding: 0.95rem 1.4rem; /* Relleno */
+  background: var(--navy-950); /* Fondo */
+  border: 1px solid rgba(201, 163, 95, 0.5); /* Filo dorado */
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35); /* Sombra */
+  font-size: 0.875rem; /* 14px */
+  color: var(--ivory); /* Texto */
+  opacity: 0; /* Oculta */
+  visibility: hidden; /* Inactiva */
+  transform: translate(-50%, 1rem); /* Centrada y desplazada abajo */
+  transition: opacity 0.35s, transform 0.5s var(--ease-out), visibility 0s 0.5s; /* Salida */
+}
+
+.toast.is-visible { /* Visible (JS) */
+  opacity: 1; /* Visible */
+  visibility: visible; /* Activa */
+  transform: translate(-50%, 0); /* Sube a su sitio */
+  transition: opacity 0.35s, transform 0.5s var(--ease-out), visibility 0s; /* Entrada */
+}
+
+
+/* =============================================================================
+   17. ANIMACIONES
+   ============================================================================= */
+.reveal-ready [data-reveal] { /* Elementos animables (JS añade .reveal-ready a <html>) */
+  opacity: 0; /* Ocultos */
+  transform: translateY(32px); /* Desplazados */
+  transition: opacity 1s var(--ease-out), transform 1s var(--ease-out); /* Transición */
+  transition-delay: var(--reveal-delay, 0s); /* Retraso opcional desde el HTML */
+}
+
+.reveal-ready [data-reveal="mask"] { /* Variante "cortina" para imágenes: el elemento queda visible y una capa lo tapa */
+  opacity: 1; /* Sin fundido (así IntersectionObserver sí lo detecta; un clip-path total lo haría "invisible" para el observador) */
+  transform: none; /* Sin desplazamiento */
+}
+
+.reveal-ready [data-reveal="mask"]::after { /* Cortina que cubre la imagen */
+  content: ''; /* Pseudo-elemento vacío */
+  position: absolute; /* Sobre el contenido (el contenedor ya es position: relative) */
+  inset: 0; /* Lo cubre por completo */
+  z-index: 2; /* Encima de la imagen */
+  background: var(--mask-color, var(--ivory)); /* Mismo color que el fondo de la sección */
+  transform-origin: top; /* Se recoge hacia arriba */
+  transition: transform 1.3s var(--ease-in-out); /* Movimiento de telón */
+}
+
+.reveal-ready [data-reveal="mask"].is-revealed::after { /* Al entrar en pantalla */
+  transform: scaleY(0); /* La cortina se recoge y descubre la imagen */
+}
+
+.reveal-ready [data-reveal].is-revealed { /* Al entrar en pantalla (JS) */
+  opacity: 1; /* Visible */
+  transform: none; /* En su sitio */
+}
+
+@keyframes rise-in { /* Subir y aparecer */
+  from { opacity: 0; transform: translateY(14px); } /* Inicio */
+  to { opacity: 1; transform: none; } /* Final */
+}
+
+@keyframes grow-x { /* Crecer en horizontal */
+  from { transform: scaleX(0); } /* Vacío */
+  to { transform: scaleX(1); } /* Lleno */
+}
+
+@keyframes loader-failsafe { /* Seguro de la pantalla de carga */
+  to { visibility: hidden; } /* Se oculta */
+}
+
+@keyframes glow { /* Halo del punto de estado */
+  0% { box-shadow: 0 0 0 0 rgba(201, 163, 95, 0.6); } /* Halo pegado */
+  100% { box-shadow: 0 0 0 12px rgba(201, 163, 95, 0); } /* Halo expandido y transparente */
+}
+
+@keyframes scroll-hint { /* Destello que baja */
+  0% { transform: translateY(-100%); } /* Arriba, fuera */
+  50% { transform: translateY(0); } /* Cubre la línea */
+  100% { transform: translateY(100%); } /* Abajo, fuera */
+}
+
+@keyframes drawer-in { /* Panel entra */
+  from { transform: translateX(100%); } /* Fuera a la derecha */
+  to { transform: none; } /* En su sitio */
+}
+
+@keyframes drawer-out { /* Panel sale */
+  to { transform: translateX(100%); } /* Hacia la derecha */
+}
+
+@keyframes fade-in { /* Aparecer */
+  from { opacity: 0; } /* Transparente */
+}
+
+@keyframes fade-out { /* Desaparecer */
+  to { opacity: 0; } /* Transparente */
+}
+
+
+/* =============================================================================
+   18. MEDIA QUERIES (mobile-first)
+   ============================================================================= */
+@media (prefers-reduced-motion: no-preference) { /* Solo si no se pidió reducir movimiento */
+  html { scroll-behavior: smooth; } /* Desplazamiento suave entre anclas */
+}
+
+@media (hover: none), (pointer: coarse) { /* Pantallas táctiles */
+  .works__preview { display: none; } /* Sin vista previa flotante */
+}
+
+@media (min-width: 768px) { /* Tablets */
+  .contact-form__row { grid-template-columns: 1fr 1fr; } /* Nombre y correo lado a lado */
+
+  .work__row { /* Fila de proyecto en una sola línea */
+    grid-template-columns: 4rem 1fr 13rem 4.5rem 3rem; /* Número · título · disciplina · año · flecha */
+    grid-template-areas: "index title type year arrow"; /* Áreas en fila */
+    padding-block: 2rem; /* Más aire */
+  }
+
+  .work__index { align-self: center; padding-top: 0; } /* Número centrado */
+  .work__type, .work__year { grid-area: auto; justify-self: start; } /* Cada uno en su propia columna */
+  .work__type { grid-column: 3; } /* Columna 3 */
+  .work__year { grid-column: 4; } /* Columna 4 */
+  .work__arrow { grid-column: 5; justify-self: end; } /* Columna 5 */
+
+  .footer__bottom { /* Pie en fila */
+    flex-direction: row; /* Horizontal */
+    justify-content: space-between; /* Extremos */
+    align-items: center; /* Centrado */
+  }
+}
+
+@media (min-width: 1024px) { /* Escritorio */
+  html { scroll-padding-top: 0; } /* Ya no hay barra superior que compensar */
+
+  .topbar, .menu { display: none; } /* Se ocultan barra y menú móvil */
+  .rail { display: flex; } /* Aparece el riel lateral */
+  main, .footer { margin-left: var(--rail-w); } /* El contenido deja espacio al riel */
+
+  .hero { padding-top: 4rem; } /* Sin barra superior */
+
+  .philosophy__grid { grid-template-columns: 0.85fr 1.15fr; gap: 6rem; } /* Retrato y texto lado a lado */
+  .portrait { position: sticky; top: 4rem; } /* El retrato acompaña al texto al hacer scroll */
+
+  .works__head { grid-template-columns: 1.2fr 0.8fr; align-items: end; column-gap: 4rem; } /* Título y bajada lado a lado */
+  .works__head .section-head { grid-column: 1 / -1; } /* El encabezado ocupa toda la fila */
+
+  .services__grid { grid-template-columns: 0.8fr 1.2fr; gap: 6rem; } /* Introducción y acordeón */
+  .services__intro { position: sticky; top: 4rem; align-self: start; } /* Introducción fija */
+
+  .journey__grid { grid-template-columns: 0.8fr 1.2fr; gap: 6rem; } /* Introducción y línea de tiempo */
+  .journey__intro { position: sticky; top: 4rem; align-self: start; } /* Introducción fija */
+
+  .contact__grid { grid-template-columns: 0.9fr 1.1fr; gap: 6rem; align-items: start; } /* Datos y formulario */
+}
+
+
+/* =============================================================================
+   19. MOVIMIENTO REDUCIDO (accesibilidad)
+   ============================================================================= */
+@media (prefers-reduced-motion: reduce) { /* Si el sistema pide reducir movimiento */
+  *, *::before, *::after { /* Todo */
+    animation-duration: 0.01ms !important; /* Animaciones casi instantáneas */
+    animation-iteration-count: 1 !important; /* Sin bucles */
+    transition-duration: 0.01ms !important; /* Transiciones casi instantáneas */
+    transition-delay: 0s !important; /* Sin retrasos */
+  }
+}
